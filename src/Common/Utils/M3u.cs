@@ -1,4 +1,5 @@
 ﻿using m3u_editor.Common.Models;
+using MaterialDesignThemes.Wpf;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
@@ -7,11 +8,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Media;
 
 namespace m3u_editor.Common.Utils
 {
     public class M3u
     {
+
         /// <summary>
         /// 解析M3U
         /// </summary>
@@ -223,6 +226,51 @@ namespace m3u_editor.Common.Utils
 
             return formattedDate.Length >= 8 ? formattedDate.Substring(0, 8) : "";
 
+        }
+        private readonly string ConfigPath = $"{AppDomain.CurrentDomain.BaseDirectory}/config.json";
+        public configEntry ReadConfig()
+        {
+            configEntry Config;
+            try
+            {
+                Config = JsonConvert.DeserializeObject<configEntry>(File.ReadAllText(ConfigPath));
+                return Config;
+            }
+            catch
+            {
+                Config = new configEntry();
+                Config.IsDark = false;
+                WirteConfig(Config);
+                return Config;
+            }
+
+
+        }
+        public void WirteConfig(configEntry Config)
+        {
+            string jsonStr = JsonConvert.SerializeObject(Config);
+            File.WriteAllText(ConfigPath, jsonStr);
+        }
+
+        public void ChangeThemes(bool IsThemeDark, configEntry Config)
+        {
+            var path = IsThemeDark ? new Uri("Themes/DarkTheme.xaml", UriKind.RelativeOrAbsolute) : new Uri("Themes/LightTheme.xaml", UriKind.RelativeOrAbsolute);
+
+            foreach (var res in Application.Current.Resources.MergedDictionaries)
+            {
+                if (res.Source != null && (res.Source.ToString() == "Themes/LightTheme.xaml" || res.Source.ToString() == "Themes/DarkTheme.xaml"))
+                {
+                    res.Source = path;
+                }
+            }
+            var paletteHelper = new PaletteHelper();
+            var theme = paletteHelper.GetTheme();
+            theme.SetBaseTheme(IsThemeDark ? BaseTheme.Dark : BaseTheme.Light);
+            theme.SetPrimaryColor(theme.GetBaseTheme() == BaseTheme.Dark ? Colors.OrangeRed : Colors.Blue);
+            theme.SetSecondaryColor(Colors.Lime);
+            paletteHelper.SetTheme(theme);
+            Config.IsDark = IsThemeDark;
+            WirteConfig(Config);
         }
     }
     class ExportedM3uEntry

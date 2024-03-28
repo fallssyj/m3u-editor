@@ -51,8 +51,13 @@ namespace m3u_editor.ViewModels
             set { searchText = value; RaisePropertyChanged(); }
         }
 
+        private configEntry config;
 
-
+        public configEntry Config
+        {
+            get { return config; }
+            set { config = value; }
+        }
 
         private ObservableCollection<M3uEntry> m3UEntries;
         public ObservableCollection<M3uEntry> M3UEntries
@@ -91,10 +96,11 @@ namespace m3u_editor.ViewModels
         public DelegateCommand RefreshCommand { get; private set; }
         public DelegateCommand<DataGrid> SearchInputCommand { get; private set; }
         public DelegateCommand OpenGithub { get; private set; }
+        public DelegateCommand ChangeThemesCommand { get; private set; }
         public DelegateCommand OpenAboutCommand { get; private set; }
         public DelegateCommand ShowAboutCommand { get; private set; }
 
-        M3u m3U = new M3u();
+        private M3u m3U = new M3u();
 
 
         public MainWindowViewModel()
@@ -107,11 +113,13 @@ namespace m3u_editor.ViewModels
         /// </summary
         private void InitializeComponents()
         {
-
+            Config = m3U.ReadConfig();
             InitCommand();
             M3UEntries = new ObservableCollection<M3uEntry>();
             CompileVersion = $"Version {m3U.GetCompileVersion()}";
+            m3U.ChangeThemes(Config.IsDark, Config);
         }
+
 
         /// <summary>
         /// 注册一些事件
@@ -119,7 +127,7 @@ namespace m3u_editor.ViewModels
         private void InitCommand()
         {
 
-            OpenFileCommand = new DelegateCommand(openFile);
+            OpenFileCommand = new DelegateCommand(openFileAsync);
             DropCommand = new DelegateCommand<DragEventArgs>(dropFileAsync);
             SaveFileCommand = new DelegateCommand(saveFile);
             UpItemMove = new DelegateCommand<DataGrid>(upItemMove);
@@ -136,6 +144,8 @@ namespace m3u_editor.ViewModels
             MaxWindowCommand = new DelegateCommand(() => { Application.Current.MainWindow.WindowState = Application.Current.MainWindow.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized; });
             CloseWindowCommand = new DelegateCommand(() => { Application.Current.MainWindow.Close(); });
 
+            ChangeThemesCommand = new DelegateCommand(() => { m3U.ChangeThemes(!Config.IsDark, Config); });
+
             OpenGithub = new DelegateCommand(() =>
             {
                 Process.Start(new ProcessStartInfo
@@ -149,13 +159,18 @@ namespace m3u_editor.ViewModels
             ShowAboutCommand = new DelegateCommand(OpenAbout);
         }
 
+        /// <summary>
+        /// 显示关于窗口
+        /// </summary>
         private void OpenAbout()
         {
             IsAbout = IsAbout != Visibility.Visible ? Visibility.Visible : Visibility.Collapsed;
 
         }
-
-        private async void openFile()
+        /// <summary>
+        /// 打开文件
+        /// </summary>
+        private async void openFileAsync()
         {
 
             await Task.Run(() =>
@@ -171,6 +186,10 @@ namespace m3u_editor.ViewModels
                     M3UEntries = m3U.ParseTxtFile(FilePath);
             });
         }
+        /// <summary>
+        /// 接收到拖放文件
+        /// </summary>
+        /// <param name="e"></param>
         private async void dropFileAsync(DragEventArgs e)
         {
             await Task.Run(() =>
@@ -192,9 +211,28 @@ namespace m3u_editor.ViewModels
             });
 
         }
+        /// <summary>
+        /// 保存为m3u
+        /// </summary>
         private void saveFile() { m3U.GenerateM3uString(M3UEntries, FilePath); }
+        /// <summary>
+        /// 保存为json
+        /// </summary>
         private void saveJsonFile() { m3U.GenerateJsonString(M3UEntries, FilePath); }
-        private void refreshFile() { M3UEntries = m3U.ParseM3uFile(FilePath); }
+        /// <summary>
+        /// 重载文件
+        /// </summary>
+        private void refreshFile()
+        {
+            if (string.IsNullOrEmpty(FilePath)) return;
+            string FileExtension = System.IO.Path.GetExtension(FilePath);
+            if (FileExtension.ToLower() == ".m3u")
+                M3UEntries = m3U.ParseM3uFile(FilePath);
+            if (FileExtension.ToLower() == ".json")
+                M3UEntries = m3U.ParseJsonFile(FilePath);
+            if (FileExtension.ToLower() == ".txt")
+                M3UEntries = m3U.ParseTxtFile(FilePath);
+        }
 
         private void upItemMove(DataGrid dataGrid)
         {
@@ -245,6 +283,10 @@ namespace m3u_editor.ViewModels
             M3UEntries.RemoveAt(selectedIndex);
             dataGrid.SelectedIndex = selectedIndex - 1;
         }
+        /// <summary>
+        /// 搜索列表
+        /// </summary>
+        /// <param name="dataGrid"></param>
         private async void searchItem(DataGrid dataGrid)
         {
             if (dataGrid == null) return;
