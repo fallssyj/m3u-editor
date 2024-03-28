@@ -6,7 +6,7 @@
 
 ```
 json格式
-
+[
   {
     "Tvgname": "xx",
     "Tvgid": "",
@@ -23,11 +23,12 @@ json格式
     "Name2": "xx",
     "Link": "http://**********"
   }
+]
 ```
 ```
 txt格式
 
-Name,Url
+name,url
 
 ```
 # 依赖
