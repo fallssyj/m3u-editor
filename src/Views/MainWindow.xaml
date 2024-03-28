@@ -171,12 +171,10 @@
                             Command="{Binding OpenGithub}"
                             Content="{materialDesign:PackIcon Kind=Github}"
                             ToolTip="fallssyj@m3u-editor" />
-                        <Separator />
                         <Button
                             Command="{Binding OpenAboutCommand}"
                             Content="{materialDesign:PackIcon Kind=Information}"
                             ToolTip="关于" />
-                        <Separator />
 
                     </ToolBar>
                 </ToolBarTray>
