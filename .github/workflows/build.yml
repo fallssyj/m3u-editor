@@ -1,0 +1,32 @@
+name: release
+
+on:
+  #push:
+  #  branches: 
+  #    - main
+  workflow_dispatch:
+   
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Release]
+
+    runs-on: windows-latest 
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+
+    - name: Build
+      run:  cd src && 
+        .\build.ps1
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: m3u-editor
+        path: |
+            .\src\bin\m3u-editor
