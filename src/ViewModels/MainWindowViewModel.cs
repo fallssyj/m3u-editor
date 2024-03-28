@@ -2,6 +2,7 @@
 using m3u_editor.Common.Utils;
 using Prism.Commands;
 using Prism.Mvvm;
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -289,31 +290,38 @@ namespace m3u_editor.ViewModels
         /// <param name="dataGrid"></param>
         private async void searchItem(DataGrid dataGrid)
         {
-            if (dataGrid == null) return;
-
-            string searchTypeName = SelectedOption.Content.ToString();
-            await Task.Run(() =>
+            try
             {
-                if (string.IsNullOrEmpty(SearchText) || SearchText.Length < 1)
+                if (dataGrid == null) return;
+
+                string searchTypeName = SelectedOption.Content.ToString();
+                await Task.Run(() =>
                 {
-                    foreach (var item in M3UEntries)
+                    if (string.IsNullOrEmpty(SearchText) || SearchText.Length < 1)
                     {
-                        item.IsHighlighted = false;
+                        foreach (var item in M3UEntries)
+                        {
+                            item.IsHighlighted = false;
+                        }
                     }
-                }
-                else
-                {
-                    foreach (var item in M3UEntries)
+                    else
                     {
-                        item.IsHighlighted = item.GetType().GetProperty(searchTypeName).GetValue(item).ToString().Contains(SearchText) ? true : false;
+                        foreach (var item in M3UEntries)
+                        {
+                            item.IsHighlighted = item.GetType().GetProperty(searchTypeName).GetValue(item).ToString().Contains(SearchText) ? true : false;
+                        }
                     }
-                }
-            });
+                });
 
 
-            dataGrid.CancelEdit();
-            dataGrid.CommitEdit();
-            dataGrid.Items.Refresh();
+                dataGrid.CancelEdit();
+                dataGrid.CommitEdit();
+                dataGrid.Items.Refresh();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
 
         }
 
