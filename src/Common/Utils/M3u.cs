@@ -46,14 +46,14 @@ namespace m3u_editor.Common.Utils
                                 currentEntry.Tvglogo = ExtractM3uInfo(parts[0], "tvg-logo");
                                 currentEntry.Name2 = parts[1].Trim();
                                 currentEntry.Grouptitle = ExtractM3uInfo(parts[0], "group-title");
+
+                                currentEntry.IsHighlighted = false;
+                                entries.Add(currentEntry);
                             }
                         }
-                        else if (!string.IsNullOrWhiteSpace(line) && currentEntry != null)
+                        else if (currentEntry != null)
                         {
                             currentEntry.Link = line;
-                            currentEntry.IsHighlighted = false;
-                            entries.Add(currentEntry);
-                            currentEntry = null;
                         }
                     }
                 }
