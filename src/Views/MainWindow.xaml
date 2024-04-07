@@ -21,16 +21,9 @@
     TextOptions.TextRenderingMode="Auto"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None">
-    <Window.Style>
-        <Style TargetType="Window">
-            <Setter Property="WindowChrome.WindowChrome">
-                <Setter.Value>
-                    <WindowChrome GlassFrameThickness="-1" ResizeBorderThickness="10" />
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Style>
+
     <Border
+        Padding="5"
         Background="{DynamicResource PrimaryBackgroundColor}"
         BorderBrush="{DynamicResource PrimaryGrayColor}"
         BorderThickness="0.5"
@@ -90,100 +83,91 @@
                 </StackPanel>
             </Grid>
 
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="839*" />
-                    <ColumnDefinition Width="439*" />
-                </Grid.ColumnDefinitions>
-                <ToolBarTray Grid.ColumnSpan="2">
-                    <ToolBar ClipToBounds="False" Style="{StaticResource MaterialDesignToolBar}">
-                        <Button
-                            Command="{Binding OpenFileCommand}"
-                            Content="{materialDesign:PackIcon Kind=FolderOpen}"
-                            ToolTip="打开" />
-                        <Button
-                            Command="{Binding SaveFileCommand}"
-                            Content="{materialDesign:PackIcon Kind=ContentSave}"
-                            ToolTip="保存" />
-                        <Separator />
-                        <Button
-                            Command="{Binding UpItemMove}"
-                            CommandParameter="{Binding ElementName=m3u_list}"
-                            Content="{materialDesign:PackIcon Kind=ArrowUpBoldCircle}"
-                            ToolTip="向上移动" />
-                        <Button
-                            Command="{Binding DownItemMove}"
-                            CommandParameter="{Binding ElementName=m3u_list}"
-                            Content="{materialDesign:PackIcon Kind=ArrowDownCircle}"
-                            ToolTip="向下移动" />
-                        <Button
-                            Command="{Binding AddItem}"
-                            CommandParameter="{Binding ElementName=m3u_list}"
-                            Content="{materialDesign:PackIcon Kind=PlusThick}"
-                            ToolTip="添加" />
-                        <Button
-                            Command="{Binding DeleteItem}"
-                            CommandParameter="{Binding ElementName=m3u_list}"
-                            Content="{materialDesign:PackIcon Kind=DeleteForever}"
-                            ToolTip="删除选中项" />
-                        <Separator />
-                        <Button
-                            Command="{Binding SaveJsonFileCommand}"
-                            Content="{materialDesign:PackIcon Kind=CodeBlockBraces}"
-                            ToolTip="导出为JSON" />
-                        <Button
-                            Command="{Binding RefreshCommand}"
-                            Content="{materialDesign:PackIcon Kind=Refresh}"
-                            ToolTip="重载" />
-                        <TextBlock
-                            Margin="5,0"
-                            VerticalAlignment="Center"
-                            Foreground="{DynamicResource TextSecundaryColor}"
-                            Text="{Binding FilePath}" />
-                        <Separator />
+            <ToolBarTray Grid.Row="1">
+                <ToolBar ClipToBounds="False" Style="{StaticResource MaterialDesignToolBar}">
+                    <Button
+                        Command="{Binding OpenFileCommand}"
+                        Content="{materialDesign:PackIcon Kind=FolderOpen}"
+                        ToolTip="打开" />
+                    <Button
+                        Command="{Binding SaveFileCommand}"
+                        Content="{materialDesign:PackIcon Kind=ContentSave}"
+                        ToolTip="保存" />
+                    <Separator />
+                    <Button
+                        Command="{Binding UpItemMove}"
+                        CommandParameter="{Binding ElementName=m3u_list}"
+                        Content="{materialDesign:PackIcon Kind=ArrowUpBoldCircle}"
+                        ToolTip="向上移动" />
+                    <Button
+                        Command="{Binding DownItemMove}"
+                        CommandParameter="{Binding ElementName=m3u_list}"
+                        Content="{materialDesign:PackIcon Kind=ArrowDownCircle}"
+                        ToolTip="向下移动" />
+                    <Button
+                        Command="{Binding AddItem}"
+                        CommandParameter="{Binding ElementName=m3u_list}"
+                        Content="{materialDesign:PackIcon Kind=PlusThick}"
+                        ToolTip="添加" />
+                    <Button
+                        Command="{Binding DeleteItem}"
+                        CommandParameter="{Binding ElementName=m3u_list}"
+                        Content="{materialDesign:PackIcon Kind=DeleteForever}"
+                        ToolTip="删除选中项" />
+                    <Separator />
+                    <Button
+                        Command="{Binding SaveJsonFileCommand}"
+                        Content="{materialDesign:PackIcon Kind=CodeBlockBraces}"
+                        ToolTip="导出为JSON" />
+                    <Button
+                        Command="{Binding RefreshCommand}"
+                        Content="{materialDesign:PackIcon Kind=Refresh}"
+                        ToolTip="重载" />
+                    <TextBlock
+                        Margin="5,0"
+                        VerticalAlignment="Center"
+                        Foreground="{DynamicResource TextSecundaryColor}"
+                        Text="{Binding FilePath}" />
+                    <Separator />
 
-                        <ComboBox SelectedItem="{Binding SelectedOption, Mode=TwoWay}">
-                            <ComboBoxItem Content="Tvgname" />
-                            <ComboBoxItem Content="Tvgid" />
-                            <ComboBoxItem Content="Tvglogo" />
-                            <ComboBoxItem Content="Grouptitle" />
-                            <ComboBoxItem Content="Name2" />
-                            <ComboBoxItem Content="Link" />
-                            <ComboBox.SelectedIndex>0</ComboBox.SelectedIndex>
-                        </ComboBox>
-                        <TextBox
-                            Width="200"
-                            materialDesign:HintAssist.Hint="输入搜索内容"
-                            materialDesign:TextFieldAssist.HasClearButton="True"
-                            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="TextChanged">
-                                    <i:InvokeCommandAction Command="{Binding SearchInputCommand}" CommandParameter="{Binding ElementName=m3u_list}" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </TextBox>
-                        <Separator />
-                        <Button
-                            Command="{Binding ChangeThemesCommand}"
-                            Content="{materialDesign:PackIcon Kind=Palette}"
-                            ToolTip="主题" />
-                        <Button
-                            Command="{Binding OpenGithub}"
-                            Content="{materialDesign:PackIcon Kind=Github}"
-                            ToolTip="fallssyj@m3u-editor" />
-                        <Button
-                            Command="{Binding OpenAboutCommand}"
-                            Content="{materialDesign:PackIcon Kind=Information}"
-                            ToolTip="关于" />
+                    <ComboBox SelectedItem="{Binding SelectedOption, Mode=TwoWay}">
+                        <ComboBoxItem Content="Tvgname" />
+                        <ComboBoxItem Content="Tvgid" />
+                        <ComboBoxItem Content="Tvglogo" />
+                        <ComboBoxItem Content="Grouptitle" />
+                        <ComboBoxItem Content="Name2" />
+                        <ComboBoxItem Content="Link" />
+                        <ComboBox.SelectedIndex>0</ComboBox.SelectedIndex>
+                    </ComboBox>
+                    <TextBox
+                        Width="200"
+                        materialDesign:HintAssist.Hint="输入搜索内容"
+                        materialDesign:TextFieldAssist.HasClearButton="True"
+                        Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="TextChanged">
+                                <i:InvokeCommandAction Command="{Binding SearchInputCommand}" CommandParameter="{Binding ElementName=m3u_list}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </TextBox>
+                    <Separator />
+                    <Button
+                        Command="{Binding ChangeThemesCommand}"
+                        Content="{materialDesign:PackIcon Kind=Palette}"
+                        ToolTip="主题色切换" />
+                    <Button
+                        Command="{Binding OpenGithub}"
+                        Content="{materialDesign:PackIcon Kind=Github}"
+                        ToolTip="fallssyj@m3u-editor" />
+                    <Button
+                        Command="{Binding OpenAboutCommand}"
+                        Content="{materialDesign:PackIcon Kind=Information}"
+                        ToolTip="关于" />
 
-                    </ToolBar>
-                </ToolBarTray>
-            </Grid>
+                </ToolBar>
+            </ToolBarTray>
 
             <Grid Grid.Row="2">
-
-
-
                 <DataGrid
                     x:Name="m3u_list"
                     AllowDrop="True"
