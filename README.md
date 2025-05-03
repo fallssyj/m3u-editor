@@ -56,7 +56,7 @@ Tvgname,Link
 
 ### 分流
 
-[蓝奏](https://fallssyj.lanzoul.com/b014bnd0d) 
+[蓝奏](https://fallssyj.lanzoul.com/iLMI51u2pg2h) 
 
 
 ### Thanks to
