@@ -1,71 +1,117 @@
 ﻿using Prism.Mvvm;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace m3u_editor.Common.Models
 {
     public class M3uEntry : BindableBase
     {
+        private string _tvgname = string.Empty;
+        private string _tvgid = string.Empty;
+        private string _tvglogo = string.Empty;
+        private string _grouptitle = string.Empty;
+        private string _name2 = string.Empty;
+        private string _link = string.Empty;
+        private bool _isHighlighted;
+
         /// <summary>
-        /// 名称
+        /// 频道名称
         /// </summary>
-        private string tvgname;
+        [MaxLength(500)]
         public string Tvgname
         {
-            get { return tvgname; }
-            set { tvgname = value; }
+            get => _tvgname;
+            set => SetProperty(ref _tvgname, value?.Trim() ?? string.Empty);
         }
+
         /// <summary>
-        /// ID
+        /// 频道ID
         /// </summary>
-        private string tvgid;
+        [MaxLength(100)]
         public string Tvgid
         {
-            get { return tvgid; }
-            set { tvgid = value; }
+            get => _tvgid;
+            set => SetProperty(ref _tvgid, value?.Trim() ?? string.Empty);
         }
+
         /// <summary>
-        /// logo地址
+        /// 频道Logo地址
         /// </summary>
-        private string tvglogo;
+        [Url]
+        [MaxLength(500)]
         public string Tvglogo
         {
-            get { return tvglogo; }
-            set { tvglogo = value; }
+            get => _tvglogo;
+            set => SetProperty(ref _tvglogo, value?.Trim() ?? string.Empty);
         }
-        private string grouptitle;
+
         /// <summary>
-        /// 组名称
+        /// 分组名称
         /// </summary>
+        [MaxLength(200)]
         public string Grouptitle
         {
-            get { return grouptitle; }
-            set { grouptitle = value; }
+            get => _grouptitle;
+            set => SetProperty(ref _grouptitle, value?.Trim() ?? string.Empty);
         }
+
         /// <summary>
-        /// name2
+        /// 显示名称
         /// </summary>
-        private string name2;
+        [Required]
+        [MaxLength(500)]
         public string Name2
         {
-            get { return name2; }
-            set { name2 = value; }
+            get => _name2;
+            set => SetProperty(ref _name2, value?.Trim() ?? string.Empty);
         }
+
         /// <summary>
-        /// Link
+        /// 播放链接
         /// </summary>
-        private string link;
+        [Required]
+        [Url]
+        [MaxLength(2000)]
         public string Link
         {
-            get { return link; }
-            set { link = value; }
+            get => _link;
+            set => SetProperty(ref _link, value?.Trim() ?? string.Empty);
         }
 
-        private bool isHighlighted;
-
+        /// <summary>
+        /// 是否高亮显示（用于搜索）
+        /// </summary>
         public bool IsHighlighted
         {
-            get { return isHighlighted; }
-            set { isHighlighted = value; }
+            get => _isHighlighted;
+            set => SetProperty(ref _isHighlighted, value);
         }
 
+        /// <summary>
+        /// 验证条目是否有效
+        /// </summary>
+        public bool IsValid()
+        {
+            return !string.IsNullOrWhiteSpace(Name2) && 
+                   !string.IsNullOrWhiteSpace(Link) &&
+                   System.Uri.TryCreate(Link, UriKind.Absolute, out _);
+        }
+
+        /// <summary>
+        /// 创建条目的浅拷贝
+        /// </summary>
+        public M3uEntry Clone()
+        {
+            return new M3uEntry
+            {
+                Tvgname = Tvgname,
+                Tvgid = Tvgid,
+                Tvglogo = Tvglogo,
+                Grouptitle = Grouptitle,
+                Name2 = Name2,
+                Link = Link,
+                IsHighlighted = IsHighlighted
+            };
+        }
     }
 }

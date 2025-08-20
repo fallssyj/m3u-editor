@@ -1,11 +1,10 @@
-name: release
+name: Release Build
 
 on:
-  #push:
-  #  branches: 
-  #    - main
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
-   
 
 jobs:
   build:
@@ -13,20 +12,50 @@ jobs:
       matrix:
         configuration: [Release]
 
-    runs-on: windows-latest 
+    runs-on: windows-latest
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
 
     - name: Build
-      run:  cd src && 
-        .\build.ps1
-        
+      run: cd src && .\build.ps1 -Configuration Release
+
+    - name: Get Version from .csproj
+      id: get_version
+      run: |
+        $version = (Get-Content src/m3u_editor.csproj | Select-String '<Version>([^<]+)</Version>').Matches.Groups[1].Value
+        if (-not $version) { 
+          $version = "1.0.0" 
+          Write-Host "Warning: Version not found in .csproj, using default: $version"
+        }
+        echo "version=$version" >> $env:GITHUB_OUTPUT
+
+    - name: Create Release Zip
+      run: |
+        $version = "${{ steps.get_version.outputs.version }}"
+        Compress-Archive -Path .\src\bin\m3u-editor\* -DestinationPath "m3u-editor-$version.zip" -Force
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: m3u-editor
         path: |
-            .\src\bin\m3u-editor
+          .\src\bin\m3u-editor
+          m3u-editor-$version.zip
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: m3u-editor-${{ steps.get_version.outputs.version }}.zip
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

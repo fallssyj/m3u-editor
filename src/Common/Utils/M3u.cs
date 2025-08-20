@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
@@ -16,99 +17,127 @@ namespace m3u_editor.Common.Utils
     {
 
         /// <summary>
-        /// 解析M3U
+        /// 解析M3U文件
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public ObservableCollection<M3uEntry> ParseM3uFile(string filePath)
+        /// <param name="filePath">文件路径</param>
+        /// <returns>M3U条目集合</returns>
+        public async Task<ObservableCollection<M3uEntry>> ParseM3uFileAsync(string filePath)
         {
+            if (!File.Exists(filePath)) return new ObservableCollection<M3uEntry>();
+            
+            var entries = new ObservableCollection<M3uEntry>();
             try
             {
-                if (!File.Exists(filePath)) return null;
-                ObservableCollection<M3uEntry> entries = new ObservableCollection<M3uEntry>();
-                using (StreamReader reader = new StreamReader(filePath))
+                using var reader = new StreamReader(filePath);
+                M3uEntry? currentEntry = null;
+                string? line;
+                
+                while ((line = await reader.ReadLineAsync()) is not null)
                 {
-                    M3uEntry currentEntry = null;
-                    string line = null;
-                    while ((line = reader.ReadLine()!) != null)
-                    {
-                        line = line.Trim();
-                        if (line.StartsWith("#EXTINF:"))
-                        {
-                            line = line.Substring("#EXTINF:".Length).Trim();
-                            int commaIndex = line.IndexOf(',');
-                            if (commaIndex > 0)
-                            {
-                                string[] parts = line.Split(',');
-                                currentEntry = new M3uEntry();
-                                currentEntry.Tvgname = ExtractM3uInfo(parts[0], "tvg-name");
-                                currentEntry.Tvgid = ExtractM3uInfo(parts[0], "tvg-id");
-                                currentEntry.Tvglogo = ExtractM3uInfo(parts[0], "tvg-logo");
-                                currentEntry.Name2 = parts[1].Trim();
-                                currentEntry.Grouptitle = ExtractM3uInfo(parts[0], "group-title");
+                    line = line.Trim();
+                    if (string.IsNullOrEmpty(line)) continue;
 
-                                currentEntry.IsHighlighted = false;
-                                entries.Add(currentEntry);
-                            }
-                        }
-                        else if (currentEntry != null)
+                    if (line.StartsWith("#EXTINF:"))
+                    {
+                        line = line["#EXTINF:".Length..].Trim();
+                        int commaIndex = line.IndexOf(',');
+                        if (commaIndex > 0)
                         {
-                            currentEntry.Link = line;
+                            currentEntry = new M3uEntry
+                            {
+                                Tvgname = ExtractM3uInfo(line[..commaIndex], "tvg-name"),
+                                Tvgid = ExtractM3uInfo(line[..commaIndex], "tvg-id"),
+                                Tvglogo = ExtractM3uInfo(line[..commaIndex], "tvg-logo"),
+                                Name2 = line[(commaIndex + 1)..].Trim(),
+                                Grouptitle = ExtractM3uInfo(line[..commaIndex], "group-title"),
+                                IsHighlighted = false
+                            };
+                            entries.Add(currentEntry);
                         }
+                    }
+                    else if (currentEntry is not null && !line.StartsWith("#"))
+                    {
+                        currentEntry.Link = line;
                     }
                 }
                 return entries;
             }
-            catch (Exception e)
+            catch (IOException ex)
             {
-                MessageBox.Show(e.Message);
+                throw new InvalidOperationException($"读取M3U文件时发生IO错误: {ex.Message}", ex);
             }
-            return null;
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"解析M3U文件时发生错误: {ex.Message}", ex);
+            }
         }
         /// <summary>
-        /// 解析JSON
+        /// 解析JSON文件
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public ObservableCollection<M3uEntry> ParseJsonFile(string filePath)
+        /// <param name="filePath">文件路径</param>
+        /// <returns>M3U条目集合</returns>
+        public async Task<ObservableCollection<M3uEntry>> ParseJsonFileAsync(string filePath)
         {
+            if (!File.Exists(filePath)) return new ObservableCollection<M3uEntry>();
+            
             try
             {
-                if (!File.Exists(filePath)) return null;
-                return JsonConvert.DeserializeObject<ObservableCollection<M3uEntry>>(File.ReadAllText(filePath));
+                var jsonContent = await File.ReadAllTextAsync(filePath);
+                return JsonConvert.DeserializeObject<ObservableCollection<M3uEntry>>(jsonContent) ?? new ObservableCollection<M3uEntry>();
             }
-            catch (Exception e)
+            catch (JsonException ex)
             {
-                MessageBox.Show(e.Message);
+                throw new InvalidOperationException($"JSON文件格式错误: {ex.Message}", ex);
             }
-            return null;
+            catch (IOException ex)
+            {
+                throw new InvalidOperationException($"读取JSON文件时发生IO错误: {ex.Message}", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"解析JSON文件时发生错误: {ex.Message}", ex);
+            }
         }
         /// <summary>
-        /// 解析txt
+        /// 解析TXT文件
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public ObservableCollection<M3uEntry> ParseTxtFile(string filePath)
+        /// <param name="filePath">文件路径</param>
+        /// <returns>M3U条目集合</returns>
+        public async Task<ObservableCollection<M3uEntry>> ParseTxtFileAsync(string filePath)
         {
+            if (!File.Exists(filePath)) return new ObservableCollection<M3uEntry>();
+            
+            var entries = new ObservableCollection<M3uEntry>();
             try
             {
-                if (!File.Exists(filePath)) return null;
-                ObservableCollection<M3uEntry> entries = new ObservableCollection<M3uEntry>();
-                string[] vars = File.ReadAllLines(filePath);
-                foreach (string var in vars)
+                var lines = await File.ReadAllLinesAsync(filePath);
+                foreach (var line in lines)
                 {
-                    if (string.IsNullOrWhiteSpace(var)) continue;
-                    if (var.Substring(0, 1) == "#") continue;
-                    entries.Add(new M3uEntry() { Name2 = var.Split(',')[0], Tvgname = var.Split(',')[0], Link = var.Split(',')[1] });
-
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    if (line.StartsWith("#")) continue;
+                    
+                    var parts = line.Split(',');
+                    if (parts.Length >= 2)
+                    {
+                        entries.Add(new M3uEntry
+                        {
+                            Name2 = parts[0].Trim(),
+                            Tvgname = parts[0].Trim(),
+                            Link = parts[1].Trim(),
+                            IsHighlighted = false
+                        });
+                    }
                 }
                 return entries;
             }
-            catch (Exception e)
+            catch (IOException ex)
             {
-                MessageBox.Show(e.Message);
+                throw new InvalidOperationException($"读取TXT文件时发生IO错误: {ex.Message}", ex);
             }
-            return null;
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"解析TXT文件时发生错误: {ex.Message}", ex);
+            }
         }
 
         private string ExtractM3uInfo(string m3u, string tagInfo)
@@ -142,7 +171,7 @@ namespace m3u_editor.Common.Utils
                 return openFileDialog.FileName;
             }
 
-            return null;
+            return string.Empty;
         }
 
         /// <summary>
@@ -213,40 +242,73 @@ namespace m3u_editor.Common.Utils
 
         public string GetCompileVersion()
         {
-            string OriginVersion = "" + File.GetLastWriteTime(this.GetType().Assembly.Location);
-            string formattedDate = "";
-
-            foreach (char ch in OriginVersion)
+            // 获取入口程序集
+            var assembly = System.Reflection.Assembly.GetEntryAssembly();
+            if (assembly != null)
             {
-                if (char.IsDigit(ch))
+                // 首先尝试获取信息版本（对应.csproj中的Version）
+                var informationalVersionAttr = assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false).FirstOrDefault() as System.Reflection.AssemblyInformationalVersionAttribute;
+                if (informationalVersionAttr != null && !string.IsNullOrEmpty(informationalVersionAttr.InformationalVersion))
                 {
-                    formattedDate += ch;
+                    // 移除可能附加的提交哈希（以'+'开头的内容）
+                    var infoVersion = informationalVersionAttr.InformationalVersion;
+                    int plusIndex = infoVersion.IndexOf('+');
+                    if (plusIndex >= 0)
+                    {
+                        infoVersion = infoVersion.Substring(0, plusIndex);
+                    }
+                    return infoVersion;
+                }
+
+                // 如果没有信息版本，则使用程序集版本
+                var asmVersion = assembly.GetName().Version;
+                if (asmVersion != null)
+                {
+                    return asmVersion.ToString();
                 }
             }
 
-            return formattedDate.Length >= 8 ? formattedDate.Substring(0, 8) : "";
+            // 备用方案：返回文件版本
+            var fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            if (!string.IsNullOrEmpty(fileVersionInfo.ProductVersion))
+            {
+                // 同样处理文件版本中的提交哈希
+                var fileVersion = fileVersionInfo.ProductVersion;
+                int plusIndex = fileVersion.IndexOf('+');
+                if (plusIndex >= 0)
+                {
+                    fileVersion = fileVersion.Substring(0, plusIndex);
+                }
+                return fileVersion;
+            }
 
+            return "1.0.0"; // 默认版本
         }
         private readonly string ConfigPath = $"{AppDomain.CurrentDomain.BaseDirectory}/config.json";
         public configEntry ReadConfig()
         {
-            configEntry Config;
+            configEntry? config = null;
             try
             {
-                Config = JsonConvert.DeserializeObject<configEntry>(File.ReadAllText(ConfigPath));
-                return Config;
+                config = JsonConvert.DeserializeObject<configEntry>(File.ReadAllText(ConfigPath));
             }
             catch
             {
-                Config = new configEntry();
-                Config.IsDark = false;
-                WirteConfig(Config);
-                return Config;
+                // Ignore and create new config
             }
+
+            if (config == null)
+            {
+                config = new configEntry();
+                config.IsDark = false;
+                WriteConfig(config);
+            }
+
+            return config;
 
 
         }
-        public void WirteConfig(configEntry Config)
+        public void WriteConfig(configEntry Config)
         {
             string jsonStr = JsonConvert.SerializeObject(Config);
             File.WriteAllText(ConfigPath, jsonStr);
@@ -270,16 +332,16 @@ namespace m3u_editor.Common.Utils
             theme.SetSecondaryColor(Colors.Lime);
             paletteHelper.SetTheme(theme);
             Config.IsDark = IsThemeDark;
-            WirteConfig(Config);
+            WriteConfig(Config);
         }
     }
     class ExportedM3uEntry
     {
-        public string Tvgname { get; set; }
-        public string Tvgid { get; set; }
-        public string Tvglogo { get; set; }
-        public string Grouptitle { get; set; }
-        public string Name2 { get; set; }
-        public string Link { get; set; }
+        public string Tvgname { get; set; } = string.Empty;
+        public string Tvgid { get; set; } = string.Empty;
+        public string Tvglogo { get; set; } = string.Empty;
+        public string Grouptitle { get; set; } = string.Empty;
+        public string Name2 { get; set; } = string.Empty;
+        public string Link { get; set; } = string.Empty;
     }
 }

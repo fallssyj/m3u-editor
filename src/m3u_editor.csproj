@@ -6,22 +6,51 @@
     <ApplicationIcon>Assets\icons\icon.ico</ApplicationIcon>
     <FileVersion>1.0.0.0</FileVersion>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Version>1.5.0</Version>
+    <Authors>fallssyj</Authors>
+    <Company>fallssyj</Company>
+    <Product>M3U Editor</Product>
+    <Description>A WPF application for editing M3U files with dark/light theme support</Description>
+    <Copyright>Copyright © 2024 fallssyj</Copyright>
+    <PackageLicenseUrl>https://github.com/fallssyj/m3u-editor/blob/main/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/fallssyj/m3u-editor</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/fallssyj/m3u-editor</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <Optimize>true</Optimize>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  
   <ItemGroup>
     <None Remove="Assets\icons\icon.ico" />
     <None Remove="Assets\icons\icon.png" />
   </ItemGroup>
+  
   <ItemGroup>
     <Resource Include="Assets\icons\icon.ico" />
     <Resource Include="Assets\icons\icon.png" />
   </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="MaterialDesignColors" Version="3.0.0" />
     <PackageReference Include="MaterialDesignThemes" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Prism.DryIoc" Version="8.1.97" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
+  
   <ItemGroup>
     <Folder Include="Common\Events\" />
+    <Folder Include="Common\Extensions\" />
+    <Folder Include="Common\Services\" />
+    <Folder Include="Common\Validators\" />
   </ItemGroup>
 </Project>

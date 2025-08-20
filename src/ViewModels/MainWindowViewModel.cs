@@ -4,6 +4,7 @@ using Prism.Commands;
 using Prism.Mvvm;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,7 +28,7 @@ namespace m3u_editor.ViewModels
             set { SetProperty(ref author, value); }
         }
 
-        private string compileVersion;
+        private string compileVersion = string.Empty;
 
         public string CompileVersion
         {
@@ -36,7 +37,7 @@ namespace m3u_editor.ViewModels
         }
 
 
-        private string filePath;
+        private string filePath = string.Empty;
 
         public string FilePath
         {
@@ -44,7 +45,7 @@ namespace m3u_editor.ViewModels
             set { filePath = value; RaisePropertyChanged(); }
         }
 
-        private string searchText;
+        private string searchText = string.Empty;
 
         public string SearchText
         {
@@ -52,7 +53,7 @@ namespace m3u_editor.ViewModels
             set { searchText = value; RaisePropertyChanged(); }
         }
 
-        private configEntry config;
+        private configEntry config = new configEntry();
 
         public configEntry Config
         {
@@ -60,7 +61,7 @@ namespace m3u_editor.ViewModels
             set { config = value; }
         }
 
-        private ObservableCollection<M3uEntry> m3UEntries;
+        private ObservableCollection<M3uEntry> m3UEntries = new ObservableCollection<M3uEntry>();
         public ObservableCollection<M3uEntry> M3UEntries
         {
             get { return m3UEntries; }
@@ -68,9 +69,9 @@ namespace m3u_editor.ViewModels
         }
 
 
-        private ComboBoxItem selectedOption;
+        private ComboBoxItem? selectedOption;
 
-        public ComboBoxItem SelectedOption
+        public ComboBoxItem? SelectedOption
         {
             get { return selectedOption; }
             set { selectedOption = value; RaisePropertyChanged(); }
@@ -83,23 +84,23 @@ namespace m3u_editor.ViewModels
             set { isAbout = value; RaisePropertyChanged(); }
         }
 
-        public DelegateCommand MinWindowCommand { get; private set; }
-        public DelegateCommand MaxWindowCommand { get; private set; }
-        public DelegateCommand CloseWindowCommand { get; private set; }
-        public DelegateCommand OpenFileCommand { get; private set; }
-        public DelegateCommand<DragEventArgs> DropCommand { get; private set; }
-        public DelegateCommand SaveFileCommand { get; private set; }
-        public DelegateCommand SaveJsonFileCommand { get; private set; }
-        public DelegateCommand<DataGrid> UpItemMove { get; private set; }
-        public DelegateCommand<DataGrid> DownItemMove { get; private set; }
-        public DelegateCommand<DataGrid> AddItem { get; private set; }
-        public DelegateCommand<DataGrid> DeleteItem { get; private set; }
-        public DelegateCommand RefreshCommand { get; private set; }
-        public DelegateCommand<DataGrid> SearchInputCommand { get; private set; }
-        public DelegateCommand OpenGithub { get; private set; }
-        public DelegateCommand ChangeThemesCommand { get; private set; }
-        public DelegateCommand OpenAboutCommand { get; private set; }
-        public DelegateCommand ShowAboutCommand { get; private set; }
+        public DelegateCommand MinWindowCommand { get; private set; } = null!;
+        public DelegateCommand MaxWindowCommand { get; private set; } = null!;
+        public DelegateCommand CloseWindowCommand { get; private set; } = null!;
+        public DelegateCommand OpenFileCommand { get; private set; } = null!;
+        public DelegateCommand<DragEventArgs> DropCommand { get; private set; } = null!;
+        public DelegateCommand SaveFileCommand { get; private set; } = null!;
+        public DelegateCommand SaveJsonFileCommand { get; private set; } = null!;
+        public DelegateCommand<DataGrid> UpItemMove { get; private set; } = null!;
+        public DelegateCommand<DataGrid> DownItemMove { get; private set; } = null!;
+        public DelegateCommand<DataGrid> AddItem { get; private set; } = null!;
+        public DelegateCommand<DataGrid> DeleteItem { get; private set; } = null!;
+        public DelegateCommand RefreshCommand { get; private set; } = null!;
+        public DelegateCommand<DataGrid> SearchInputCommand { get; private set; } = null!;
+        public DelegateCommand OpenGithub { get; private set; } = null!;
+        public DelegateCommand ChangeThemesCommand { get; private set; } = null!;
+        public DelegateCommand OpenAboutCommand { get; private set; } = null!;
+        public DelegateCommand ShowAboutCommand { get; private set; } = null!;
 
         private M3u m3U = new M3u();
 
@@ -111,7 +112,7 @@ namespace m3u_editor.ViewModels
         }
         /// <summary>
         /// 初始化一些操作
-        /// </summary
+        /// </summary>
         private void InitializeComponents()
         {
             Config = m3U.ReadConfig();
@@ -173,19 +174,43 @@ namespace m3u_editor.ViewModels
         /// </summary>
         private async void openFileAsync()
         {
-
-            await Task.Run(() =>
+            try
             {
-                FilePath = m3U.GetSelectedFilePath("所有文件|*.*") ?? FilePath;
+                string? selectedPath = m3U.GetSelectedFilePath("所有文件|*.*");
+                if (!string.IsNullOrEmpty(selectedPath))
+                {
+                    FilePath = selectedPath;
+                }
                 if (string.IsNullOrEmpty(FilePath)) return;
-                string FileExtension = System.IO.Path.GetExtension(FilePath);
-                if (FileExtension.ToLower() == ".m3u")
-                    M3UEntries = m3U.ParseM3uFile(FilePath);
-                if (FileExtension.ToLower() == ".json")
-                    M3UEntries = m3U.ParseJsonFile(FilePath);
-                if (FileExtension.ToLower() == ".txt")
-                    M3UEntries = m3U.ParseTxtFile(FilePath);
-            });
+                
+                string fileExtension = System.IO.Path.GetExtension(FilePath).ToLower();
+                ObservableCollection<M3uEntry>? entries = null;
+                
+                switch (fileExtension)
+                {
+                    case ".m3u":
+                        entries = await m3U.ParseM3uFileAsync(FilePath);
+                        break;
+                    case ".json":
+                        entries = await m3U.ParseJsonFileAsync(FilePath);
+                        break;
+                    case ".txt":
+                        entries = await m3U.ParseTxtFileAsync(FilePath);
+                        break;
+                    default:
+                        MessageBox.Show("不支持的文件格式");
+                        return;
+                }
+                
+                if (entries != null)
+                {
+                    M3UEntries = entries;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开文件时发生错误: {ex.Message}");
+            }
         }
         /// <summary>
         /// 接收到拖放文件
@@ -193,24 +218,46 @@ namespace m3u_editor.ViewModels
         /// <param name="e"></param>
         private async void dropFileAsync(DragEventArgs e)
         {
-            await Task.Run(() =>
+            try
             {
                 if (e.Data.GetDataPresent(DataFormats.FileDrop))
                 {
                     string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                    FilePath = files[0];
+                    if (files.Length > 0 && !string.IsNullOrEmpty(files[0]))
+                    {
+                        FilePath = files[0];
+                    }
                     if (string.IsNullOrEmpty(FilePath)) return;
 
-                    string FileExtension = System.IO.Path.GetExtension(FilePath);
-                    if (FileExtension.ToLower() == ".m3u")
-                        M3UEntries = m3U.ParseM3uFile(FilePath);
-                    if (FileExtension.ToLower() == ".json")
-                        M3UEntries = m3U.ParseJsonFile(FilePath);
-                    if (FileExtension.ToLower() == ".txt")
-                        M3UEntries = m3U.ParseTxtFile(FilePath);
-                }
-            });
+                    string fileExtension = System.IO.Path.GetExtension(FilePath).ToLower();
+                    ObservableCollection<M3uEntry>? entries = null;
 
+                    switch (fileExtension)
+                    {
+                        case ".m3u":
+                            entries = await m3U.ParseM3uFileAsync(FilePath);
+                            break;
+                        case ".json":
+                            entries = await m3U.ParseJsonFileAsync(FilePath);
+                            break;
+                        case ".txt":
+                            entries = await m3U.ParseTxtFileAsync(FilePath);
+                            break;
+                        default:
+                            MessageBox.Show("不支持的文件格式");
+                            return;
+                    }
+
+                    if (entries != null)
+                    {
+                        M3UEntries = entries;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"拖放文件时发生错误: {ex.Message}");
+            }
         }
         /// <summary>
         /// 保存为m3u
@@ -223,16 +270,40 @@ namespace m3u_editor.ViewModels
         /// <summary>
         /// 重载文件
         /// </summary>
-        private void refreshFile()
+        private async void refreshFile()
         {
             if (string.IsNullOrEmpty(FilePath)) return;
-            string FileExtension = System.IO.Path.GetExtension(FilePath);
-            if (FileExtension.ToLower() == ".m3u")
-                M3UEntries = m3U.ParseM3uFile(FilePath);
-            if (FileExtension.ToLower() == ".json")
-                M3UEntries = m3U.ParseJsonFile(FilePath);
-            if (FileExtension.ToLower() == ".txt")
-                M3UEntries = m3U.ParseTxtFile(FilePath);
+            
+            try
+            {
+                string fileExtension = System.IO.Path.GetExtension(FilePath).ToLower();
+                ObservableCollection<M3uEntry>? entries = null;
+
+                switch (fileExtension)
+                {
+                    case ".m3u":
+                        entries = await m3U.ParseM3uFileAsync(FilePath);
+                        break;
+                    case ".json":
+                        entries = await m3U.ParseJsonFileAsync(FilePath);
+                        break;
+                    case ".txt":
+                        entries = await m3U.ParseTxtFileAsync(FilePath);
+                        break;
+                    default:
+                        MessageBox.Show("不支持的文件格式");
+                        return;
+                }
+
+                if (entries != null)
+                {
+                    M3UEntries = entries;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"重载文件时发生错误: {ex.Message}");
+            }
         }
 
         private void upItemMove(DataGrid dataGrid)
@@ -294,7 +365,28 @@ namespace m3u_editor.ViewModels
             {
                 if (dataGrid == null) return;
 
-                string searchTypeName = SelectedOption.Content.ToString();
+                if (SelectedOption == null || SelectedOption.Content == null)
+                {
+                    // Clear highlights if no option selected
+                    foreach (var item in M3UEntries)
+                    {
+                        item.IsHighlighted = false;
+                    }
+                    dataGrid.Items.Refresh();
+                    return;
+                }
+
+                string searchTypeName = SelectedOption.Content?.ToString() ?? string.Empty;
+                if (string.IsNullOrEmpty(searchTypeName))
+                {
+                    foreach (var item in M3UEntries)
+                    {
+                        item.IsHighlighted = false;
+                    }
+                    dataGrid.Items.Refresh();
+                    return;
+                }
+
                 await Task.Run(() =>
                 {
                     if (string.IsNullOrEmpty(SearchText) || SearchText.Length < 1)
@@ -308,11 +400,27 @@ namespace m3u_editor.ViewModels
                     {
                         foreach (var item in M3UEntries)
                         {
-                            item.IsHighlighted = item.GetType().GetProperty(searchTypeName).GetValue(item).ToString().Contains(SearchText) ? true : false;
+                            var property = item.GetType().GetProperty(searchTypeName);
+                            if (property != null)
+                            {
+                                var value = property.GetValue(item);
+                                if (value != null)
+                                {
+                                    string valueString = value.ToString() ?? string.Empty;
+                                    item.IsHighlighted = valueString.Contains(SearchText ?? string.Empty);
+                                }
+                                else
+                                {
+                                    item.IsHighlighted = false;
+                                }
+                            }
+                            else
+                            {
+                                item.IsHighlighted = false;
+                            }
                         }
                     }
                 });
-
 
                 dataGrid.CancelEdit();
                 dataGrid.CommitEdit();
@@ -322,7 +430,6 @@ namespace m3u_editor.ViewModels
             {
                 MessageBox.Show(e.Message);
             }
-
         }
 
     }
