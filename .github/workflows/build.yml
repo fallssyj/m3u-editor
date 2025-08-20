@@ -37,6 +37,7 @@ jobs:
           Write-Host "Warning: Version not found in .csproj, using default: $version"
         }
         echo "version=$version" >> $env:GITHUB_OUTPUT
+        echo "tag_version=v$version" >> $env:GITHUB_OUTPUT
 
     - name: Create Release Zip
       run: |
@@ -56,6 +57,15 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: m3u-editor-${{ steps.get_version.outputs.version }}.zip
+        tag_name: ${{ github.ref_name }}
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Output Release Info
+      if: always()
+      run: |
+        echo "Version: ${{ steps.get_version.outputs.version }}"
+        echo "To create a release, push a tag starting with 'v':"
+        echo "git tag v${{ steps.get_version.outputs.version }}"
+        echo "git push origin v${{ steps.get_version.outputs.version }}"
