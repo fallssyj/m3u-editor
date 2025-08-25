@@ -53,7 +53,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: m3u-editor-${{ steps.get_version.outputs.version }}.zip
-        tag_name: ${{ github.ref_name }}
+        tag_name: ${{ steps.get_version.outputs.version }}
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
