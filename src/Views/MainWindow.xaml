@@ -21,7 +21,15 @@
     TextOptions.TextRenderingMode="Auto"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None">
-
+    <Window.Style>
+        <Style TargetType="Window">
+            <Setter Property="WindowChrome.WindowChrome">
+                <Setter.Value>
+                    <WindowChrome GlassFrameThickness="-1" ResizeBorderThickness="3" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Style>
     <Border
         Padding="5"
         Background="{DynamicResource PrimaryBackgroundColor}"
