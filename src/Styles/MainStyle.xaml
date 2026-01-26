@@ -25,7 +25,7 @@
                     <ControlTemplate.Triggers>
                         <!--  鼠标悬停  -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource SecondaryBorderBrush}" />
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource ThirdlyTextBrush}" />
                         </Trigger>
 
 
