@@ -7,7 +7,7 @@
     <Color x:Key="MainContentForegroundColor">#FF1A1A1A</Color>
     <Color x:Key="MainContentBackgroundColor">#FF1C1C1C</Color>
 
-    <Color x:Key="PrimaryTextColor">#FFFFFFFF</Color>
+    <Color x:Key="PrimaryTextColor">#e8e8e9</Color>
     <Color x:Key="SecondaryTextColor">#FF757575</Color>
     <Color x:Key="ThirdlyTextColor">#FF3F3F46</Color>
     <Color x:Key="ReverseTextColor">#FF212121</Color>
