@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RootNamespace>m3u_editor</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\ICO\app.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\Fonts\MiSans-Normal.ttf" />
+    <None Remove="Assets\ICO\app.ico" />
+    <None Remove="Assets\LICENSE\LICENSE" />
+    <None Remove="Assets\PNG\app.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HandyControl" Version="3.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Fonts\MiSans-Normal.ttf" />
+    <Resource Include="Assets\ICO\app.ico" />
+    <Resource Include="Assets\LICENSE\LICENSE" />
+    <Resource Include="Assets\PNG\app.png" />
+  </ItemGroup>
+
+</Project>

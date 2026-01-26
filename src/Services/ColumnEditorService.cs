@@ -1,0 +1,33 @@
+using m3u_editor.Models;
+using m3u_editor.ViewModels.Dialogs;
+using m3u_editor.Views;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+
+namespace m3u_editor.Services
+{
+    /// <summary>
+    /// 通过弹出 ColumnEditorWindow 来管理列编辑体验。
+    /// </summary>
+    public sealed class ColumnEditorService : IColumnEditorService
+    {
+        /// <summary>
+        /// 打开列编辑窗口并返回编辑结果。
+        /// </summary>
+        public IReadOnlyList<ColumnSchemaEntry>? EditColumns(IEnumerable<ColumnSchemaEntry> columns)
+        {
+            var columnList = columns?.ToList() ?? throw new ArgumentNullException(nameof(columns));
+            var viewModel = new ColumnEditorViewModel(columnList);
+            var window = new ColumnEditorWindow(viewModel)
+            {
+                Owner = Application.Current?.Windows
+                    .OfType<Window>()
+                    .FirstOrDefault(w => w.IsActive)
+            };
+
+            return window.ShowDialog() == true ? viewModel.ResultColumns : null;
+        }
+    }
+}

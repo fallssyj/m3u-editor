@@ -1,0 +1,100 @@
+<hc:Window
+    x:Class="m3u_editor.Views.ColumnEditorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="编辑列"
+    Width="700"
+    Height="420"
+    ResizeMode="CanMinimize"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+    <hc:Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </hc:Window.Resources>
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <ListBox
+            Grid.Column="0"
+            Margin="0,0,12,0"
+            ItemsSource="{Binding Columns}"
+            SelectedItem="{Binding SelectedColumn}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="4" Padding="4">
+                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                            <TextBox
+                                Width="200"
+                                Margin="0,0,8,0"
+                                IsEnabled="{Binding CanEdit}"
+                                Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Foreground="Gray"
+                                Text="保留"
+                                Visibility="{Binding IsReserved, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel
+            Grid.Column="1"
+            Margin="0,0,0,8"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+            <Button
+                Margin="0,0,0,8"
+                Command="{Binding AddCommand}"
+                Content="新增列" />
+            <Button
+                Margin="0,0,0,8"
+                Command="{Binding RemoveCommand}"
+                Content="删除列" />
+            <Button
+                Margin="0,0,0,8"
+                Command="{Binding MoveUpCommand}"
+                Content="上移" />
+            <Button
+                Margin="0,0,0,8"
+                Command="{Binding MoveDownCommand}"
+                Content="下移" />
+            <TextBlock
+                Foreground="DimGray"
+                Text="选择列表项后可直接在左侧文本框修改列名。"
+                TextWrapping="Wrap" />
+            <StackPanel
+                Margin="0,12,0,0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Orientation="Horizontal">
+                <TextBlock
+                    Margin="0,0,12,0"
+                    VerticalAlignment="Center"
+                    Foreground="Crimson"
+                    Text="{Binding ErrorMessage}" />
+                <Button
+                    Width="90"
+                    Margin="0,0,8,0"
+                    Command="{Binding ConfirmCommand}"
+                    Content="确定" />
+                <Button
+                    Width="90"
+                    Command="{Binding CancelCommand}"
+                    Content="取消" />
+            </StackPanel>
+        </StackPanel>
+
+
+    </Grid>
+</hc:Window>
