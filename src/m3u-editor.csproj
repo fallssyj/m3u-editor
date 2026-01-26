@@ -9,8 +9,9 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\ICO\app.ico</ApplicationIcon>
   </PropertyGroup>
+	<Import Project="$(MSBuildProjectDirectory)\version.props" Condition="Exists('$(MSBuildProjectDirectory)\version.props')" />
 
-  <ItemGroup>
+	<ItemGroup>
     <None Remove="Assets\Fonts\MiSans-Normal.ttf" />
     <None Remove="Assets\ICO\app.ico" />
     <None Remove="Assets\LICENSE\LICENSE" />
