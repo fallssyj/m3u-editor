@@ -13,8 +13,8 @@
                         <Border x:Name="bd" CornerRadius="5" />
                         <Path
                             x:Name="IconPath"
-                            Width="20"
-                            Height="20"
+                            Width="15"
+                            Height="15"
                             Data="{TemplateBinding Content}"
                             Fill="{DynamicResource PrimaryTextBrush}"
                             Stretch="Uniform" />
@@ -25,7 +25,7 @@
                     <ControlTemplate.Triggers>
                         <!--  鼠标悬停  -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource ThirdlyTextBrush}" />
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource PrimaryButtonBackground}" />
                         </Trigger>
 
 
