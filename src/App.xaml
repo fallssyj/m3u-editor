@@ -8,26 +8,24 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <hc:ThemeResources RequestedTheme="Light" />
+                <hc:ThemeResources>
+                    <hc:ThemeResources.ThemeDictionaries>
+                        <ResourceDictionary x:Key="Light" hc:ThemeDictionary.Key="Light">
+                            <!--  Put the resources you want to use in the Light theme Here  -->
+                            <SolidColorBrush x:Key="PrimaryButtonBackground" Color="#f3f3f3" />
+                        </ResourceDictionary>
+                        <ResourceDictionary x:Key="Dark" hc:ThemeDictionary.Key="Dark">
+                            <!--  Put the resources you want to use in the Dark theme Here  -->
+                            <SolidColorBrush x:Key="PrimaryButtonBackground" Color="#28282a" />
+                        </ResourceDictionary>
+                    </hc:ThemeResources.ThemeDictionaries>
+                </hc:ThemeResources>
                 <hc:Theme />
                 <ResourceDictionary Source="Styles/Icons.xaml" />
                 <ResourceDictionary Source="Styles/MainStyle.xaml" />
+                <ResourceDictionary Source="Styles/Fonts.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <!--  全局字体设置  -->
-            <FontFamily x:Key="MiSansRegular">
-                pack://application:,,,/m3u_editor;component/Assets/Fonts/MiSans-Normal.ttf#MiSans
-            </FontFamily>
 
-            <!--  全局字体样式 - 应用于所有TextBlock  -->
-            <Style TargetType="TextBlock">
-                <Setter Property="FontSize" Value="15" />
-                <Setter Property="FontFamily" Value="{StaticResource MiSansRegular}" />
-            </Style>
-
-            <!--  全局字体样式 - 应用于所有Control（包括Button、TextBox等）  -->
-            <Style TargetType="Control">
-                <Setter Property="FontFamily" Value="{StaticResource MiSansRegular}" />
-            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
