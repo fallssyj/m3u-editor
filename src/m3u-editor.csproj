@@ -18,9 +18,9 @@
     <None Remove="Assets\PNG\app.png" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="HandyControl" Version="3.5.1" />
-  </ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="HandyControls" Version="3.6.0" />
+	</ItemGroup>
 
   <ItemGroup>
     <Resource Include="Assets\Fonts\MiSans-Normal.ttf" />

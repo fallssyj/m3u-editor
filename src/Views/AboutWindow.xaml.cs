@@ -27,7 +27,7 @@ namespace m3u_editor.Views
         public ObservableCollection<string> Libraries { get; } =
         [
             "MiSans",
-            "HandyControl"
+            "HandyControls"
         ];
 
         /// <summary>

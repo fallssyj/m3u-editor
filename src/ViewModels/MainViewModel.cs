@@ -1,3 +1,5 @@
+using HandyControl.Themes;
+using HandyControl.Tools;
 using m3u_editor.Commands;
 using m3u_editor.Models;
 using m3u_editor.Services;
@@ -16,8 +18,6 @@ namespace m3u_editor.ViewModels
     public sealed class MainViewModel : ViewModelBase
     {
         private const string GithubUrl = "https://github.com/fallssyj/m3u-editor";
-        private static readonly Uri BaseLightUri = new("Styles/Theme/BaseLight.xaml", UriKind.Relative);
-        private static readonly Uri BaseDarkUri = new("Styles/Theme/BaseDark.xaml", UriKind.Relative);
         private string _appTitle = "m3u-editor";
         private readonly IM3uParser _m3uParser;
         private readonly IFileDialogService _fileDialogService;
@@ -204,35 +204,26 @@ namespace m3u_editor.ViewModels
         /// </summary>
         private void ToggleTheme()
         {
-            var dictionaries = Application.Current?.Resources?.MergedDictionaries;
-            if (dictionaries == null)
+
+            var window = Application.Current?.MainWindow;
+            if (window != null)
             {
-                return;
+                ThemeAnimationHelper.AnimateTheme(window, ThemeAnimationHelper.SlideDirection.Top, 0.3, 1, 0.5);
             }
 
-            var themeDictionary = dictionaries.FirstOrDefault(dictionary =>
-                dictionary.Source != null &&
-                dictionary.Source.OriginalString.Contains("Styles/Theme/Base", StringComparison.OrdinalIgnoreCase));
+            var currentTheme = ThemeManager.Current.ApplicationTheme;
 
-            if (themeDictionary?.Source == null)
-            {
-                return;
-            }
+            ThemeManager.Current.ApplicationTheme = currentTheme == ApplicationTheme.Light
+                ? ApplicationTheme.Dark
+                : ApplicationTheme.Light;
+            ThemeAnimationHelper.AnimateTheme(window, ThemeAnimationHelper.SlideDirection.Bottom, 0.3, 0.5, 1);
 
-            var isLight = themeDictionary.Source.OriginalString.EndsWith("BaseLight.xaml", StringComparison.OrdinalIgnoreCase);
-            var newDictionary = new ResourceDictionary
-            {
-                Source = isLight ? BaseDarkUri : BaseLightUri
-            };
-
-            var index = dictionaries.IndexOf(themeDictionary);
-            if (index >= 0)
-            {
-                dictionaries[index] = newDictionary;
-            }
-
-            _settings.ThemeMode = isLight ? ThemeMode.Dark : ThemeMode.Light;
+            // 保存到设置
+            _settings.ThemeMode = ThemeManager.Current.ApplicationTheme == ApplicationTheme.Light
+                ? ThemeMode.Light
+                : ThemeMode.Dark;
             _settingsService.Save(_settings);
+
         }
 
         /// <summary>
@@ -240,29 +231,11 @@ namespace m3u_editor.ViewModels
         /// </summary>
         private void ApplyTheme(ThemeMode theme)
         {
-            var dictionaries = Application.Current?.Resources?.MergedDictionaries;
-            if (dictionaries == null)
-            {
-                return;
-            }
 
-            var themeDictionary = dictionaries.FirstOrDefault(dictionary =>
-                dictionary.Source != null &&
-                dictionary.Source.OriginalString.Contains("Styles/Theme/Base", StringComparison.OrdinalIgnoreCase));
+            ThemeManager.Current.ApplicationTheme = theme == ThemeMode.Light
+                ? ApplicationTheme.Light
+                : ApplicationTheme.Dark;
 
-            var targetUri = theme == ThemeMode.Dark ? BaseDarkUri : BaseLightUri;
-
-            if (themeDictionary is null)
-            {
-                dictionaries.Add(new ResourceDictionary { Source = targetUri });
-                return;
-            }
-
-            var index = dictionaries.IndexOf(themeDictionary);
-            if (index >= 0)
-            {
-                dictionaries[index] = new ResourceDictionary { Source = targetUri };
-            }
         }
 
         private static void OpenGithub()
@@ -278,7 +251,7 @@ namespace m3u_editor.ViewModels
             var window = new AboutWindow
             {
                 Owner = Application.Current?.Windows
-                    .OfType<Window>()
+                    .OfType<System.Windows.Window>()
                     .FirstOrDefault(w => w.IsActive)
             };
 

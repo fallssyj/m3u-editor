@@ -36,5 +36,5 @@
 ## 致谢
 
 - MiSans
-- HandyControl
+- HandyControls
 
