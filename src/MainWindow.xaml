@@ -7,6 +7,7 @@
     xmlns:local="clr-namespace:m3u_editor"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:m3u_editor.ViewModels"
+    Title="{Binding AppTitle}"
     Width="1200"
     Height="800"
     MinWidth="800"
@@ -138,7 +139,7 @@
                         Style="{StaticResource CircleIconButton}"
                         ToolTip="编辑列" />
                     <ComboBox
-                        Height="40"
+                        Height="30"
                         MinWidth="100"
                         Margin="10,0,0,0"
                         ItemsSource="{Binding AvailableColumns}"
@@ -146,7 +147,7 @@
                         ToolTip="选择搜索列" />
                     <hc:TextBox
                         Width="200"
-                        Height="40"
+                        Height="30"
                         Margin="10,0,0,0"
                         VerticalContentAlignment="Center"
                         hc:InfoElement.Placeholder="搜索..."
@@ -158,12 +159,9 @@
             <Border
                 Grid.Row="1"
                 Margin="10,5,10,5"
-                Padding="10"
-                Background="{DynamicResource RegionBrush}"
                 CornerRadius="10">
                 <DataGrid
                     AutoGenerateColumns="True"
-                    Background="Transparent"
                     BorderThickness="0"
                     CanUserAddRows="False"
                     EnableRowVirtualization="True"
