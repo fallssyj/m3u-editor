@@ -85,24 +85,28 @@
                 <StackPanel Orientation="Horizontal">
                     <Button
                         Command="{Binding LoadM3uCommand}"
-                        Content="{StaticResource Folder}"
+                        Content="{StaticResource Folder2Open}"
                         Style="{StaticResource CircleIconButton}"
                         ToolTip="打开文件" />
-
+                    <Button
+                        Command="{Binding}"
+                        Content="{StaticResource Database}"
+                        Style="{StaticResource CircleIconButton}"
+                        ToolTip="打开数据文件" />
                     <Button
                         Command="{Binding SaveM3uCommand}"
-                        Content="{StaticResource ContentSaveAllOutline}"
+                        Content="{StaticResource Save}"
                         Style="{StaticResource CircleIconButton}"
                         ToolTip="保存文件" />
 
                     <Button
                         Command="{Binding MoveUpCommand}"
-                        Content="{StaticResource ArrowUp}"
-                        Style="{StaticResource CircleIconButton}"
+                        Content="{StaticResource BoxArrowUp}"
+                        Style="{StaticResource CircleIconButton1}"
                         ToolTip="向上移动" />
                     <Button
                         Command="{Binding MoveDownCommand}"
-                        Content="{StaticResource ArrowDown}"
+                        Content="{StaticResource BoxArrowUp}"
                         Style="{StaticResource CircleIconButton}"
                         ToolTip="向下移动" />
                     <Button
