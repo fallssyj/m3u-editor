@@ -282,12 +282,35 @@ namespace m3u_editor.ViewModels
                 return;
             }
 
+            await LoadPlaylistFromPathAsync(filePath);
+        }
+
+        public static bool IsSupportedPlaylistFile(string? filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return false;
+            }
+
+            var extension = Path.GetExtension(filePath);
+            return extension.Equals(".m3u", StringComparison.OrdinalIgnoreCase) ||
+                   extension.Equals(".m3u8", StringComparison.OrdinalIgnoreCase) ||
+                   extension.Equals(".txt", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public async Task LoadPlaylistFromPathAsync(string filePath)
+        {
+            if (!IsSupportedPlaylistFile(filePath) || !File.Exists(filePath))
+            {
+                return;
+            }
+
             SelectedFilePath = filePath;
 
             try
             {
                 IsBusy = true;
-                StatusMessage = "正在解析 m3u 文件...";
+                StatusMessage = "正在解析播放列表...";
 
                 var table = await _m3uParser.ParseAsync(filePath);
                 EnsureCandidateColumn(table);
