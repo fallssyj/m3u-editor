@@ -5,8 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="编辑列"
-    Width="700"
+    Title="列编辑"
+    Width="500"
     Height="420"
     ResizeMode="CanMinimize"
     WindowStartupLocation="CenterOwner"
@@ -15,18 +15,11 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </hc:Window.Resources>
     <Grid Margin="16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-
         <ListBox
-            Grid.Column="0"
             Margin="0,0,12,0"
             ItemsSource="{Binding Columns}"
+            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
             SelectedItem="{Binding SelectedColumn}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -42,59 +35,36 @@
                                 Foreground="Gray"
                                 Text="保留"
                                 Visibility="{Binding IsReserved, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <StackPanel
+                                Margin="30,0,0,0"
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal"
+                                Visibility="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Button
+                                    Command="{Binding DataContext.AddCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    Content="{StaticResource DatabaseAdd}"
+                                    Style="{StaticResource CircleIconButton}"
+                                    ToolTip="新增" />
+                                <Button
+                                    Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    Content="{StaticResource Delete}"
+                                    Style="{StaticResource CircleIconButton}"
+                                    ToolTip="删除" />
+                                <Button
+                                    Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    Content="{StaticResource BoxArrowUp}"
+                                    Style="{StaticResource CircleIconButton1}"
+                                    ToolTip="上移" />
+                                <Button
+                                    Command="{Binding DataContext.MoveDownCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    Content="{StaticResource BoxArrowUp}"
+                                    Style="{StaticResource CircleIconButton}"
+                                    ToolTip="下移" />
+                            </StackPanel>
                         </StackPanel>
                     </Border>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-
-        <StackPanel
-            Grid.Column="1"
-            Margin="0,0,0,8"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center">
-            <Button
-                Margin="0,0,0,8"
-                Command="{Binding AddCommand}"
-                Content="新增列" />
-            <Button
-                Margin="0,0,0,8"
-                Command="{Binding RemoveCommand}"
-                Content="删除列" />
-            <Button
-                Margin="0,0,0,8"
-                Command="{Binding MoveUpCommand}"
-                Content="上移" />
-            <Button
-                Margin="0,0,0,8"
-                Command="{Binding MoveDownCommand}"
-                Content="下移" />
-            <TextBlock
-                Foreground="DimGray"
-                Text="选择列表项后可直接在左侧文本框修改列名。"
-                TextWrapping="Wrap" />
-            <StackPanel
-                Margin="0,12,0,0"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Bottom"
-                Orientation="Horizontal">
-                <TextBlock
-                    Margin="0,0,12,0"
-                    VerticalAlignment="Center"
-                    Foreground="Crimson"
-                    Text="{Binding ErrorMessage}" />
-                <Button
-                    Width="90"
-                    Margin="0,0,8,0"
-                    Command="{Binding ConfirmCommand}"
-                    Content="确定" />
-                <Button
-                    Width="90"
-                    Command="{Binding CancelCommand}"
-                    Content="取消" />
-            </StackPanel>
-        </StackPanel>
-
-
     </Grid>
 </hc:Window>
