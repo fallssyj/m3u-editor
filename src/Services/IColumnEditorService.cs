@@ -13,6 +13,8 @@ namespace m3u_editor.Services
         /// </summary>
         /// <param name="columns">现有列的描述集合，包含保留列信息。</param>
         /// <returns>若用户点击确定则返回新列表，否则返回 null。</returns>
-        IReadOnlyList<ColumnSchemaEntry>? EditColumns(IEnumerable<ColumnSchemaEntry> columns);
+        IReadOnlyList<ColumnSchemaEntry>? EditColumns(
+            IEnumerable<ColumnSchemaEntry> columns,
+            Action<IReadOnlyList<ColumnSchemaEntry>>? onChanged = null);
     }
 }
