@@ -26,6 +26,7 @@ namespace m3u_editor.ViewModels
         private readonly AppSettings _settings;
         private readonly RelayCommand _loadM3uCommand;
         private readonly RelayCommand _saveM3uCommand;
+        private readonly RelayCommand _loadDataFileCommand;
         private readonly RelayCommand _reloadM3uCommand;
         private readonly RelayCommand _reloadJsonCommand;
         private readonly RelayCommand _playCommand;
@@ -40,9 +41,12 @@ namespace m3u_editor.ViewModels
         private string? _selectedSearchColumn;
         private string _searchText = string.Empty;
         private readonly ObservableCollection<string> _availableColumns = new();
+        private readonly ObservableCollection<string> _groupTitleCandidates = new();
         private string? _selectedFilePath;
         private string _statusMessage = "尚未加载播放列表";
         private bool _isBusy;
+
+        private const string StreamUrlCandidatesColumn = "StreamUrlCandidates";
 
         // 默认构造函数使用内置服务，方便在设计器中预览。
         public MainViewModel()
@@ -73,6 +77,7 @@ namespace m3u_editor.ViewModels
             OpenGithubCommand = new RelayCommand(_ => OpenGithub());
             _loadM3uCommand = new RelayCommand(async _ => await LoadM3uAsync(), _ => !IsBusy);
             _saveM3uCommand = new RelayCommand(async _ => await SaveM3uAsync(), _ => !IsBusy && HasChannelData);
+            _loadDataFileCommand = new RelayCommand(async _ => await LoadDataFileAsync(), _ => !IsBusy && HasChannelData);
             _reloadM3uCommand = new RelayCommand(async _ => await ReloadM3uAsync(), _ => !IsBusy && !string.IsNullOrWhiteSpace(SelectedFilePath));
             _reloadJsonCommand = new RelayCommand(async _ => await ExportJsonAsync(), _ => !IsBusy && HasChannelData);
             _playCommand = new RelayCommand(async parameter => await PlayAsync(parameter), _ => !IsBusy && HasChannelData);
@@ -98,6 +103,8 @@ namespace m3u_editor.ViewModels
 
         public ICommand SaveM3uCommand => _saveM3uCommand;
 
+        public ICommand LoadDataFileCommand => _loadDataFileCommand;
+
         public ICommand ReloadM3uCommand => _reloadM3uCommand;
 
         public ICommand ReloadJsonCommand => _reloadJsonCommand;
@@ -118,6 +125,8 @@ namespace m3u_editor.ViewModels
 
         public ObservableCollection<string> AvailableColumns => _availableColumns;
 
+        public ObservableCollection<string> GroupTitleCandidates => _groupTitleCandidates;
+
         public DataView? ChannelTable
         {
             get => _channelTable;
@@ -126,6 +135,7 @@ namespace m3u_editor.ViewModels
                 if (SetProperty(ref _channelTable, value))
                 {
                     UpdateSearchColumns();
+                    UpdateGroupTitleCandidates();
                     RefreshCommandStates();
                 }
             }
@@ -280,6 +290,7 @@ namespace m3u_editor.ViewModels
                 StatusMessage = "正在解析 m3u 文件...";
 
                 var table = await _m3uParser.ParseAsync(filePath);
+                EnsureCandidateColumn(table);
                 ChannelTable = table.DefaultView;
                 StatusMessage = $"成功加载 {table.Rows.Count} 个频道";
             }
@@ -358,6 +369,7 @@ namespace m3u_editor.ViewModels
                 StatusMessage = "正在重载 m3u 文件...";
 
                 var table = await _m3uParser.ParseAsync(SelectedFilePath);
+                EnsureCandidateColumn(table);
                 ChannelTable = table.DefaultView;
                 StatusMessage = $"重载成功：{table.Rows.Count} 个频道";
             }
@@ -418,6 +430,8 @@ namespace m3u_editor.ViewModels
                 return;
             }
 
+            EnsureCandidateColumn(table);
+
             var newRow = table.NewRow();
             if (table.Columns.Contains("ChannelName"))
             {
@@ -427,6 +441,11 @@ namespace m3u_editor.ViewModels
             if (table.Columns.Contains("Duration"))
             {
                 newRow["Duration"] = "-1";
+            }
+
+            if (table.Columns.Contains(StreamUrlCandidatesColumn))
+            {
+                newRow[StreamUrlCandidatesColumn] = new ObservableCollection<string>();
             }
 
             var insertIndex = SelectedRow is null
@@ -491,17 +510,22 @@ namespace m3u_editor.ViewModels
                 .Select(column => new ColumnSchemaEntry(column.ColumnName, IsReservedColumn(column.ColumnName), column.ColumnName))
                 .ToList();
 
-            var result = _columnEditorService.EditColumns(schema);
+            void ApplySchema(IReadOnlyList<ColumnSchemaEntry> result)
+            {
+                ApplyColumnChanges(table, result);
+                var preferredIndex = SelectedRow is null ? -1 : table.Rows.IndexOf(SelectedRow.Row);
+                RebindDataView(table, preferredIndex);
+                StatusMessage = "列信息已更新";
+            }
+
+            var result = _columnEditorService.EditColumns(schema, ApplySchema);
             if (result is null)
             {
-                StatusMessage = "已取消列编辑";
+                StatusMessage = "已关闭列编辑";
                 return;
             }
 
-            ApplyColumnChanges(table, result);
-            var preferredIndex = SelectedRow is null ? -1 : table.Rows.IndexOf(SelectedRow.Row);
-            RebindDataView(table, preferredIndex);
-            StatusMessage = "列信息已更新";
+            ApplySchema(result);
         }
 
         private DataTable? EnsureChannelTable()
@@ -515,8 +539,25 @@ namespace m3u_editor.ViewModels
             newTable.Columns.Add("ChannelName");
             newTable.Columns.Add("StreamUrl");
             newTable.Columns.Add("Duration");
+            newTable.Columns.Add(StreamUrlCandidatesColumn, typeof(ObservableCollection<string>));
             ChannelTable = newTable.DefaultView;
             return newTable;
+        }
+
+        private static void EnsureCandidateColumn(DataTable table)
+        {
+            if (!table.Columns.Contains(StreamUrlCandidatesColumn))
+            {
+                table.Columns.Add(StreamUrlCandidatesColumn, typeof(ObservableCollection<string>));
+            }
+
+            foreach (DataRow row in table.Rows)
+            {
+                if (row[StreamUrlCandidatesColumn] is not ObservableCollection<string>)
+                {
+                    row[StreamUrlCandidatesColumn] = new ObservableCollection<string>();
+                }
+            }
         }
 
         private static void ApplyColumnChanges(DataTable table, IReadOnlyList<ColumnSchemaEntry> schema)
@@ -577,6 +618,7 @@ namespace m3u_editor.ViewModels
         {
             _loadM3uCommand?.RaiseCanExecuteChanged();
             _saveM3uCommand?.RaiseCanExecuteChanged();
+            _loadDataFileCommand?.RaiseCanExecuteChanged();
             _reloadM3uCommand?.RaiseCanExecuteChanged();
             _reloadJsonCommand?.RaiseCanExecuteChanged();
             _playCommand?.RaiseCanExecuteChanged();
@@ -735,6 +777,39 @@ namespace m3u_editor.ViewModels
             SelectedSearchColumn = _availableColumns.Count > 0 ? _availableColumns[0] : null;
         }
 
+        private void UpdateGroupTitleCandidates()
+        {
+            _groupTitleCandidates.Clear();
+            if (ChannelTable?.Table is not { } table)
+            {
+                return;
+            }
+
+            var groupColumn = table.Columns
+                .Cast<DataColumn>()
+                .FirstOrDefault(column => column.ColumnName.Equals("group-title", StringComparison.OrdinalIgnoreCase));
+            if (groupColumn is null)
+            {
+                return;
+            }
+
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (DataRow row in table.Rows)
+            {
+                var value = row[groupColumn]?.ToString();
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    continue;
+                }
+
+                var trimmed = value.Trim();
+                if (seen.Add(trimmed))
+                {
+                    _groupTitleCandidates.Add(trimmed);
+                }
+            }
+        }
+
         /// <summary>
         /// 根据列名与关键字过滤 DataView。
         /// </summary>
@@ -805,7 +880,90 @@ namespace m3u_editor.ViewModels
         {
             return columnName.Equals("ChannelName", StringComparison.OrdinalIgnoreCase) ||
                    columnName.Equals("StreamUrl", StringComparison.OrdinalIgnoreCase) ||
-                   columnName.Equals("Duration", StringComparison.OrdinalIgnoreCase);
+                   columnName.Equals("Duration", StringComparison.OrdinalIgnoreCase) ||
+                   columnName.Equals(StreamUrlCandidatesColumn, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 加载数据文件（m3u），根据 ChannelName 生成 StreamUrl 候选列表。
+        /// </summary>
+        private async Task LoadDataFileAsync()
+        {
+            if (ChannelTable?.Table is not { } table)
+            {
+                StatusMessage = "请先加载播放列表";
+                return;
+            }
+
+            var initialDirectory = string.IsNullOrWhiteSpace(SelectedFilePath) ? null : Path.GetDirectoryName(SelectedFilePath);
+            var filePath = _fileDialogService.PickM3uFile(initialDirectory);
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                StatusMessage = "已取消选择数据文件";
+                return;
+            }
+
+            try
+            {
+                IsBusy = true;
+                StatusMessage = "正在解析数据文件...";
+
+                var dataTable = await _m3uParser.ParseAsync(filePath);
+                EnsureCandidateColumn(table);
+
+                var candidates = dataTable.Rows.Cast<DataRow>()
+                    .Select(row => new
+                    {
+                        Name = dataTable.Columns.Contains("ChannelName") ? row["ChannelName"]?.ToString() : null,
+                        Url = dataTable.Columns.Contains("StreamUrl") ? row["StreamUrl"]?.ToString() : null
+                    })
+                    .Where(item => !string.IsNullOrWhiteSpace(item.Name) && !string.IsNullOrWhiteSpace(item.Url))
+                    .ToList();
+
+                var matchedRows = 0;
+                foreach (DataRow row in table.Rows)
+                {
+                    var channelName = table.Columns.Contains("ChannelName") ? row["ChannelName"]?.ToString() : null;
+                    var currentStreamUrl = table.Columns.Contains("StreamUrl") ? row["StreamUrl"]?.ToString() : null;
+                    var list = new ObservableCollection<string>();
+
+                    if (!string.IsNullOrWhiteSpace(channelName))
+                    {
+                        foreach (var item in candidates)
+                        {
+                            if (item.Name != null && item.Name.IndexOf(channelName, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                if (!string.IsNullOrWhiteSpace(currentStreamUrl) && string.Equals(item.Url, currentStreamUrl, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    continue;
+                                }
+
+                                if (!list.Contains(item.Url!))
+                                {
+                                    list.Add(item.Url!);
+                                }
+                            }
+                        }
+                    }
+
+                    if (list.Count > 0)
+                    {
+                        matchedRows++;
+                    }
+
+                    row[StreamUrlCandidatesColumn] = list;
+                }
+
+                StatusMessage = $"数据文件已加载：{matchedRows} 行生成候选地址";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"加载数据文件失败：{ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
     }
 }
