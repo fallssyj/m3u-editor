@@ -4,11 +4,7 @@
         pack://application:,,,/m3u_editor;component/Assets/Fonts/MiSans-Normal.ttf#MiSans
     </FontFamily>
 
-    <!--  全局字体样式 - 应用于所有TextBlock  -->
-    <Style TargetType="TextBlock">
-        <Setter Property="FontSize" Value="15" />
-        <Setter Property="FontFamily" Value="{StaticResource MiSansRegular}" />
-    </Style>
+
 
     <!--  全局字体样式 - 应用于所有Control（包括Button、TextBox等）  -->
     <Style TargetType="Control">
