@@ -6,9 +6,9 @@
     xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="列编辑"
-    Width="500"
+    Width="520"
     Height="420"
-    ResizeMode="CanMinimize"
+    ResizeMode="NoResize"
     WindowStartupLocation="CenterOwner"
     mc:Ignorable="d">
     <hc:Window.Resources>
