@@ -1,10 +1,8 @@
 using m3u_editor.Commands;
 using m3u_editor.Models;
-using m3u_editor.ViewModels;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows.Input;
 
 namespace m3u_editor.ViewModels.Dialogs
@@ -19,7 +17,6 @@ namespace m3u_editor.ViewModels.Dialogs
         private readonly RelayCommand _moveUpCommand;
         private readonly RelayCommand _moveDownCommand;
         private ColumnEditorItem? _selectedColumn;
-        private string? _errorMessage;
 
         /// <summary>
         /// 使用已有列构建编辑器。
@@ -34,20 +31,24 @@ namespace m3u_editor.ViewModels.Dialogs
             _columns = new ObservableCollection<ColumnEditorItem>(
                 columns.Select(c => new ColumnEditorItem(c.Name, c.IsReserved, c.OriginalName)));
 
+            _columns.CollectionChanged += Columns_CollectionChanged;
+            foreach (var item in _columns)
+            {
+                RegisterItem(item);
+            }
+
             AddCommand = new RelayCommand(_ => AddColumn());
             _removeCommand = new RelayCommand(_ => RemoveColumn(), _ => SelectedColumn?.CanRemove == true);
             _moveUpCommand = new RelayCommand(_ => MoveColumn(-1), _ => CanMove(-1));
             _moveDownCommand = new RelayCommand(_ => MoveColumn(1), _ => CanMove(1));
-            ConfirmCommand = new RelayCommand(_ => ConfirmChanges());
-            CancelCommand = new RelayCommand(_ => RequestClose?.Invoke(this, false));
-
             SelectedColumn = _columns.FirstOrDefault();
+            NotifyColumnsChanged();
         }
 
         /// <summary>
-        /// 请求关闭窗口事件，参数表示是否点击确定。
+        /// 列发生变化时触发（校验通过后）。
         /// </summary>
-        public event EventHandler<bool>? RequestClose;
+        public event EventHandler<IReadOnlyList<ColumnSchemaEntry>>? ColumnsChanged;
 
         /// <summary>
         /// 当前列集合，支持排序与编辑。
@@ -92,28 +93,9 @@ namespace m3u_editor.ViewModels.Dialogs
         public ICommand MoveDownCommand => _moveDownCommand;
 
         /// <summary>
-        /// 确认命令。
-        /// </summary>
-        public ICommand ConfirmCommand { get; }
-
-        /// <summary>
-        /// 取消命令。
-        /// </summary>
-        public ICommand CancelCommand { get; }
-
-        /// <summary>
         /// 用户确认后的列结果。
         /// </summary>
         public IReadOnlyList<ColumnSchemaEntry> ResultColumns { get; private set; } = Array.Empty<ColumnSchemaEntry>();
-
-        /// <summary>
-        /// 校验错误提示。
-        /// </summary>
-        public string? ErrorMessage
-        {
-            get => _errorMessage;
-            private set => SetProperty(ref _errorMessage, value);
-        }
 
         /// <summary>
         /// 在当前选中项后插入新列。
@@ -138,7 +120,7 @@ namespace m3u_editor.ViewModels.Dialogs
 
             _columns.Insert(insertIndex, newItem);
             SelectedColumn = newItem;
-            ErrorMessage = null;
+            NotifyColumnsChanged();
         }
 
         /// <summary>
@@ -162,6 +144,8 @@ namespace m3u_editor.ViewModels.Dialogs
             {
                 SelectedColumn = null;
             }
+
+            NotifyColumnsChanged();
         }
 
         /// <summary>
@@ -182,6 +166,7 @@ namespace m3u_editor.ViewModels.Dialogs
             }
 
             _columns.Move(currentIndex, targetIndex);
+            NotifyColumnsChanged();
         }
 
         /// <summary>
@@ -199,21 +184,63 @@ namespace m3u_editor.ViewModels.Dialogs
             return targetIndex >= 0 && targetIndex < _columns.Count;
         }
 
-        /// <summary>
-        /// 校验并输出结果。
-        /// </summary>
-        private void ConfirmChanges()
+
+
+        private void Columns_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems is not null)
+            {
+                foreach (var item in e.OldItems.OfType<ColumnEditorItem>())
+                {
+                    UnregisterItem(item);
+                }
+            }
+
+            if (e.NewItems is not null)
+            {
+                foreach (var item in e.NewItems.OfType<ColumnEditorItem>())
+                {
+                    RegisterItem(item);
+                }
+            }
+
+            NotifyColumnsChanged();
+        }
+
+        private void RegisterItem(ColumnEditorItem item)
+        {
+            item.PropertyChanged += ColumnItem_PropertyChanged;
+        }
+
+        private void UnregisterItem(ColumnEditorItem item)
+        {
+            item.PropertyChanged -= ColumnItem_PropertyChanged;
+        }
+
+        private void ColumnItem_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ColumnEditorItem.Name))
+            {
+                NotifyColumnsChanged();
+            }
+        }
+
+        private void NotifyColumnsChanged()
         {
             if (!Validate())
             {
                 return;
             }
 
-            ResultColumns = _columns
+            ResultColumns = BuildResult();
+            ColumnsChanged?.Invoke(this, ResultColumns);
+        }
+
+        private IReadOnlyList<ColumnSchemaEntry> BuildResult()
+        {
+            return _columns
                 .Select(item => new ColumnSchemaEntry(item.Name, item.IsReserved, item.OriginalName))
                 .ToList();
-
-            RequestClose?.Invoke(this, true);
         }
 
         /// <summary>
@@ -223,7 +250,6 @@ namespace m3u_editor.ViewModels.Dialogs
         {
             if (_columns.Count == 0)
             {
-                ErrorMessage = "至少保留一列";
                 return false;
             }
 
@@ -232,7 +258,6 @@ namespace m3u_editor.ViewModels.Dialogs
             {
                 if (string.IsNullOrWhiteSpace(column.Name))
                 {
-                    ErrorMessage = "列名不能为空";
                     return false;
                 }
 
@@ -244,18 +269,15 @@ namespace m3u_editor.ViewModels.Dialogs
 
                 if (column.IsReserved && !normalized.Equals(column.OriginalName, StringComparison.Ordinal))
                 {
-                    ErrorMessage = $"保留列 {column.OriginalName} 不允许重命名";
                     return false;
                 }
 
                 if (!seen.Add(normalized))
                 {
-                    ErrorMessage = "列名必须唯一";
                     return false;
                 }
             }
 
-            ErrorMessage = null;
             return true;
         }
     }
