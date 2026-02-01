@@ -1,4 +1,4 @@
-﻿using System;
+﻿using m3u_editor.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -24,8 +24,50 @@ namespace m3u_editor
             }
         }
 
+        private void Window_PreviewDragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop) &&
+                e.Data.GetData(DataFormats.FileDrop) is string[] files &&
+                files.Any(MainViewModel.IsSupportedPlaylistFile))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+
+            e.Handled = true;
+        }
+
+        private async void Window_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop) &&
+                e.Data.GetData(DataFormats.FileDrop) is string[] files)
+            {
+                var target = files.FirstOrDefault(MainViewModel.IsSupportedPlaylistFile);
+                if (string.IsNullOrWhiteSpace(target))
+                {
+                    return;
+                }
+
+                if (DataContext is MainViewModel viewModel)
+                {
+                    await viewModel.LoadPlaylistFromPathAsync(target);
+                }
+            }
+        }
+
         private void ChannelGrid_AutoGeneratingColumn(object? sender, DataGridAutoGeneratingColumnEventArgs e)
         {
+            //if (e.Column is not null)
+            //{
+            //    
+            //}
+            if (string.Equals(e.PropertyName, "tvg-logo", StringComparison.OrdinalIgnoreCase))
+            {
+                e.Column.Width = new DataGridLength(200);
+            }
             if (string.Equals(e.PropertyName, "StreamUrlCandidates", StringComparison.OrdinalIgnoreCase))
             {
                 e.Cancel = true;
