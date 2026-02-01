@@ -14,10 +14,10 @@ namespace m3u_editor.Services
         {
             var dialog = new OpenFileDialog
             {
-                Filter = "M3U Playlist (*.m3u;*.m3u8)|*.m3u;*.m3u8|All Files (*.*)|*.*",
+                Filter = "播放列表 (*.m3u;*.m3u8;*.txt)|*.m3u;*.m3u8;*.txt|M3U Playlist (*.m3u;*.m3u8)|*.m3u;*.m3u8|TXT (*.txt)|*.txt|All Files (*.*)|*.*",
                 Multiselect = false,
                 InitialDirectory = initialDirectory,
-                Title = "选择 IPTV 播放列表"
+                Title = "选择播放列表"
             };
 
             return dialog.ShowDialog() == true ? dialog.FileName : null;
