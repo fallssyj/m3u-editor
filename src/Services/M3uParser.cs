@@ -30,6 +30,13 @@ namespace m3u_editor.Services
             }
 
             var table = CreateBaseTable();
+            var extension = Path.GetExtension(filePath);
+            if (string.Equals(extension, ".txt", StringComparison.OrdinalIgnoreCase))
+            {
+                await ParseTxtAsync(filePath, table, cancellationToken).ConfigureAwait(false);
+                return table;
+            }
+
             var lines = await File.ReadAllLinesAsync(filePath, cancellationToken).ConfigureAwait(false);
             Dictionary<string, string>? pendingEntry = null;
 
@@ -88,6 +95,45 @@ namespace m3u_editor.Services
             }
 
             return table;
+        }
+
+        private static async Task ParseTxtAsync(string filePath, DataTable table, CancellationToken cancellationToken)
+        {
+            var lines = await File.ReadAllLinesAsync(filePath, cancellationToken).ConfigureAwait(false);
+            var isFirstLine = true;
+
+            foreach (var rawLine in lines)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var line = rawLine?.Trim();
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                var parts = line.Split(',', 2, StringSplitOptions.TrimEntries);
+                if (parts.Length < 2)
+                {
+                    continue;
+                }
+
+                if (isFirstLine &&
+                    parts[0].Equals("ChannelName", StringComparison.OrdinalIgnoreCase) &&
+                    parts[1].Equals("StreamUrl", StringComparison.OrdinalIgnoreCase))
+                {
+                    isFirstLine = false;
+                    continue;
+                }
+
+                isFirstLine = false;
+                var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["ChannelName"] = parts[0],
+                    ["StreamUrl"] = parts[1]
+                };
+
+                AddRow(table, values);
+            }
         }
 
         /// <summary>
