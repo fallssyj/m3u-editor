@@ -1,5 +1,4 @@
 using m3u_editor.Models;
-using System;
 using System.IO;
 using System.Text.Json;
 
@@ -31,7 +30,7 @@ namespace m3u_editor.Services
             }
             catch
             {
-                return new AppSettings();
+                return new AppSettings { ThemeMode = ThemeMode.Dark };
             }
         }
 
