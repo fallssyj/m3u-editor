@@ -18,6 +18,30 @@
     mc:Ignorable="d">
     <hc:Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <DataTemplate x:Key="StreamUrlTextTemplate">
+            <TextBlock
+                Width="300"
+                Text="{Binding [StreamUrl]}"
+                TextTrimming="CharacterEllipsis" />
+        </DataTemplate>
+        <DataTemplate x:Key="StreamUrlComboTemplate">
+            <ComboBox
+                Width="300"
+                IsEditable="True"
+                IsTextSearchEnabled="False"
+                ItemsSource="{Binding [StreamUrlCandidates]}"
+                Text="{Binding [StreamUrl], UpdateSourceTrigger=PropertyChanged}" />
+        </DataTemplate>
+        <DataTemplate x:Key="GroupTitleTextTemplate">
+            <TextBlock Text="{Binding [group-title]}" TextTrimming="CharacterEllipsis" />
+        </DataTemplate>
+        <DataTemplate x:Key="GroupTitleComboTemplate">
+            <ComboBox
+                IsEditable="True"
+                IsTextSearchEnabled="False"
+                ItemsSource="{Binding DataContext.GroupTitleCandidates, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                Text="{Binding [group-title], UpdateSourceTrigger=PropertyChanged}" />
+        </DataTemplate>
     </hc:Window.Resources>
     <hc:Window.DataContext>
         <vm:MainViewModel />
@@ -89,7 +113,7 @@
                         Style="{StaticResource CircleIconButton}"
                         ToolTip="打开文件" />
                     <Button
-                        Command="{Binding}"
+                        Command="{Binding LoadDataFileCommand}"
                         Content="{StaticResource Database}"
                         Style="{StaticResource CircleIconButton}"
                         ToolTip="打开数据文件" />
@@ -111,22 +135,22 @@
                         ToolTip="向下移动" />
                     <Button
                         Command="{Binding InsertAfterCommand}"
-                        Content="{StaticResource VectorPointPlus}"
+                        Content="{StaticResource DatabaseAdd}"
                         Style="{StaticResource CircleIconButton}"
                         ToolTip="添加" />
                     <Button
                         Command="{Binding DeleteCommand}"
-                        Content="{StaticResource DeleteForeverOutline}"
+                        Content="{StaticResource Delete}"
                         Style="{StaticResource CircleIconButton}"
                         ToolTip="删除" />
                     <Button
                         Command="{Binding ReloadJsonCommand}"
-                        Content="{StaticResource CodeBlockBraces}"
+                        Content="{StaticResource FileJson2}"
                         Style="{StaticResource CircleIconButton}"
                         ToolTip="导出JSON" />
                     <Button
                         Command="{Binding ReloadM3uCommand}"
-                        Content="{StaticResource Autorenew}"
+                        Content="{StaticResource RefreshiOS}"
                         Style="{StaticResource CircleIconButton}"
                         ToolTip="重载" />
                     <TextBlock
@@ -147,8 +171,7 @@
                         MinWidth="100"
                         Margin="10,0,0,0"
                         ItemsSource="{Binding AvailableColumns}"
-                        SelectedItem="{Binding SelectedSearchColumn}"
-                        ToolTip="选择搜索列" />
+                        SelectedItem="{Binding SelectedSearchColumn}" />
                     <hc:TextBox
                         Width="200"
                         Height="30"
@@ -166,6 +189,7 @@
                 CornerRadius="10">
                 <DataGrid
                     AutoGenerateColumns="True"
+                    AutoGeneratingColumn="ChannelGrid_AutoGeneratingColumn"
                     BorderThickness="0"
                     CanUserAddRows="False"
                     EnableRowVirtualization="True"
