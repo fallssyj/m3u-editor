@@ -46,4 +46,56 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style x:Key="CircleIconButton1" TargetType="Button">
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <!--  圆形背景  -->
+                        <!--<Ellipse x:Name="BackgroundEllipse" Fill="Transparent" />-->
+                        <Border x:Name="bd" CornerRadius="5" />
+                        <Path
+                            x:Name="IconPath"
+                            Width="15"
+                            Height="15"
+                            Data="{TemplateBinding Content}"
+                            Fill="{DynamicResource PrimaryTextBrush}"
+                            RenderTransformOrigin="0.5,0.5"
+                            Stretch="Uniform">
+                            <Path.RenderTransform>
+                                <ScaleTransform ScaleY="-1" />
+                            </Path.RenderTransform>
+                        </Path>
+
+                    </Grid>
+
+                    <!--  视觉状态触发器  -->
+                    <ControlTemplate.Triggers>
+                        <!--  鼠标悬停  -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="{DynamicResource PrimaryButtonBackground}" />
+                        </Trigger>
+
+
+                        <Trigger Property="IsMouseOver" Value="False">
+                            <Setter TargetName="bd" Property="Background" Value="Transparent" />
+                        </Trigger>
+                        <!--  按下状态  -->
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="bd" Property="Opacity" Value="0.6" />
+                        </Trigger>
+
+                        <!--  禁用状态  -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="IconPath" Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>
