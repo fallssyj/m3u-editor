@@ -12,21 +12,24 @@
     Height="800"
     MinWidth="800"
     MinHeight="600"
+    AllowDrop="True"
+    Drop="Window_Drop"
     Icon="/Assets/ICO/app.ico"
     MouseLeftButtonDown="Window_MouseLeftButtonDown"
+    PreviewDragOver="Window_PreviewDragOver"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <hc:Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <DataTemplate x:Key="StreamUrlTextTemplate">
             <TextBlock
-                Width="300"
+                Width="230"
                 Text="{Binding [StreamUrl]}"
                 TextTrimming="CharacterEllipsis" />
         </DataTemplate>
         <DataTemplate x:Key="StreamUrlComboTemplate">
             <ComboBox
-                Width="300"
+                Width="230"
                 IsEditable="True"
                 IsTextSearchEnabled="False"
                 ItemsSource="{Binding [StreamUrlCandidates]}"
@@ -196,7 +199,7 @@
                     HeadersVisibility="All"
                     IsReadOnly="False"
                     ItemsSource="{Binding ChannelTable}"
-                    RowHeight="60"
+                    RowHeight="70"
                     SelectedItem="{Binding SelectedRow, Mode=TwoWay}"
                     SelectionMode="Extended"
                     SelectionUnit="FullRow">
