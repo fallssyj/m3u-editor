@@ -15,11 +15,6 @@ namespace m3u_editor.Views
         {
             InitializeComponent();
             DataContext = viewModel;
-            viewModel.RequestClose += (_, result) =>
-            {
-                DialogResult = result;
-                Close();
-            };
         }
     }
 }
