@@ -11,7 +11,7 @@
 
 </div>
 
-![m3u-editor](https://raw.githubusercontent.com/fallssyj/m3u-editor/refs/heads/main/img/ScreenShot_2026-01-26_171318_781.png)
+![m3u-editor](https://raw.githubusercontent.com/fallssyj/m3u-editor/refs/heads/main/img/2026-02-02-090213.png)
 
 ## 功能特性
 
