@@ -1,0 +1,70 @@
+<hc:Window
+    x:Class="m3u_editor.Views.ColumnEditorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="列编辑"
+    Width="520"
+    Height="420"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+    <hc:Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </hc:Window.Resources>
+    <Grid Margin="16">
+        <ListBox
+            Margin="0,0,12,0"
+            ItemsSource="{Binding Columns}"
+            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+            ScrollViewer.VerticalScrollBarVisibility="Auto"
+            SelectedItem="{Binding SelectedColumn}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="4" Padding="4">
+                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                            <TextBox
+                                Width="200"
+                                Margin="0,0,8,0"
+                                IsEnabled="{Binding CanEdit}"
+                                Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Foreground="Gray"
+                                Text="保留"
+                                Visibility="{Binding IsReserved, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <StackPanel
+                                Margin="30,0,0,0"
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal"
+                                Visibility="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Button
+                                    Command="{Binding DataContext.AddCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    Content="{StaticResource DatabaseAdd}"
+                                    Style="{StaticResource CircleIconButton}"
+                                    ToolTip="新增" />
+                                <Button
+                                    Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    Content="{StaticResource Delete}"
+                                    Style="{StaticResource CircleIconButton}"
+                                    ToolTip="删除" />
+                                <Button
+                                    Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    Content="{StaticResource BoxArrowUp}"
+                                    Style="{StaticResource CircleIconButton1}"
+                                    ToolTip="上移" />
+                                <Button
+                                    Command="{Binding DataContext.MoveDownCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    Content="{StaticResource BoxArrowUp}"
+                                    Style="{StaticResource CircleIconButton}"
+                                    ToolTip="下移" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</hc:Window>

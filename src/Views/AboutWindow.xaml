@@ -1,0 +1,66 @@
+﻿<hc:Window
+    x:Class="m3u_editor.Views.AboutWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:local="clr-namespace:m3u_editor.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="{Binding _Title}"
+    Width="520"
+    Height="450"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+    <Border Padding="20">
+        <StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Image
+                    Width="40"
+                    Height="40"
+                    Source="/Assets/PNG/app.png">
+                    <Image.Clip>
+                        <EllipseGeometry
+                            Center="20,20"
+                            RadiusX="20"
+                            RadiusY="20" />
+                    </Image.Clip>
+                </Image>
+                <TextBlock
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    FontSize="20"
+                    Text="{Binding AppTitle}" />
+            </StackPanel>
+
+            <TabControl Margin="0,20,0,0">
+                <TabItem Header="鸣谢">
+                    <ListBox
+                        Height="240"
+                        Padding="5"
+                        BorderThickness="0"
+                        ItemsSource="{Binding Libraries}"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                </TabItem>
+                <TabItem Header="MIT License">
+                    <TextBox
+                        Height="240"
+                        Padding="10"
+                        VerticalAlignment="Top"
+                        AcceptsReturn="True"
+                        BorderThickness="0"
+                        IsReadOnly="True"
+                        Text="{Binding LicenseText, Mode=OneWay}"
+                        TextWrapping="Wrap"
+                        VerticalScrollBarVisibility="Auto" />
+                </TabItem>
+            </TabControl>
+
+            <Separator Margin="0,16,0,10" />
+            <TextBlock>
+                <Run Text="© 2026 " />
+                <Run Text="{Binding AppTitle}" />
+            </TextBlock>
+        </StackPanel>
+    </Border>
+</hc:Window>

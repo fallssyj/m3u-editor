@@ -1,0 +1,31 @@
+﻿<Application
+    x:Class="m3u_editor.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:local="clr-namespace:m3u_editor"
+    StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <hc:ThemeResources>
+                    <hc:ThemeResources.ThemeDictionaries>
+                        <ResourceDictionary x:Key="Light" hc:ThemeDictionary.Key="Light">
+                            <!--  Put the resources you want to use in the Light theme Here  -->
+                            <SolidColorBrush x:Key="PrimaryButtonBackground" Color="#f3f3f3" />
+                        </ResourceDictionary>
+                        <ResourceDictionary x:Key="Dark" hc:ThemeDictionary.Key="Dark">
+                            <!--  Put the resources you want to use in the Dark theme Here  -->
+                            <SolidColorBrush x:Key="PrimaryButtonBackground" Color="#28282a" />
+                        </ResourceDictionary>
+                    </hc:ThemeResources.ThemeDictionaries>
+                </hc:ThemeResources>
+                <hc:Theme />
+                <ResourceDictionary Source="Styles/Icons.xaml" />
+                <ResourceDictionary Source="Styles/MainStyle.xaml" />
+                <ResourceDictionary Source="Styles/Fonts.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
